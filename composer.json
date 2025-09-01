@@ -1,0 +1,40 @@
+{
+    "name": "visuellverstehen/statamic-asset-atlas",
+    "description": "Track where your Statamic assets are used to make moving, replacing and deleting them quick and easy.",
+    "keywords": [ "statamic", "addon", "assets", "replace", "move", "delete" ],
+    "license": "MIT",
+    "type": "statamic-addon",
+    "autoload": {
+        "psr-4": {
+            "VV\\AssetAtlas\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "visuellverstehen"
+        }
+    ],
+    "support": {
+        "email": "hello@visuellverstehen.de"
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic Asset Atlas",
+            "description": "Track where your Statamic assets are used to make moving, replacing and deleting them quick and easy."
+        },
+        "laravel": {
+            "providers": [
+                "VV\\AssetAtlas\\ServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "statamic/cms": "^5.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    }
+}
