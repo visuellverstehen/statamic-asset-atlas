@@ -32,6 +32,9 @@
         "php": "^8.3",
         "statamic/cms": "^5.0"
     },
+    "require-dev": {
+        "spatie/laravel-ray": "^1.40"
+    },
     "config": {
         "allow-plugins": {
             "pixelfear/composer-dist-plugin": true
