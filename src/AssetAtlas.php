@@ -25,6 +25,12 @@ class AssetAtlas
         ->map(fn ($ref) => Entry::find($ref->entry_id));
     }
     
+    public static function remove(string $assetPath, string $containerHandle): void
+    {
+        self::find($assetPath, $containerHandle)
+        ->each(fn ($item) => $item->delete());
+    }
+    
     public static function store(string $assetPath, string $entryId, string $containerHandle): void
     {
         AssetReference::firstOrCreate([
