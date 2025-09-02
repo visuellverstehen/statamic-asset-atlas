@@ -27,21 +27,24 @@ class UpdateAssetReferences extends BaseListener
         
         // TODO: get other stuff apart from entries
         
-        // Get all items using the atlas.
-        // Note that we're searching by the assets' NEW path, not
-        // the old path. The order of updating references matters!
-        return AssetAtlas::findEntries($this->asset->path(), $this->asset->container()?->handle());
+        // Get all items using the atlas, based on the 
+        // OLD path, so *before* updating the atlas.
+        return AssetAtlas::findEntries($this->asset->getOriginal('path'), $this->asset->container()?->handle());
     }
     
     /**
      * Handle the asset deleted event.
-     * Update the atlas *after* the actual handler is called.
      */
     public function handleDeleted(AssetDeleted $event)
     {   
+        $this->asset = $event->asset;
+        
         parent::handleDeleted($event);
-            
-        // TODO
+        
+        AssetAtlas::remove(
+            $this->asset->getOriginal('path'),
+            $this->asset->container()->handle()
+        );
     }
     
     /**
@@ -49,43 +52,31 @@ class UpdateAssetReferences extends BaseListener
      */
     public function handleReplaced(AssetReplaced $event)
     {   
+        $this->asset = $event->originalAsset;
+        
         parent::handleReplaced($event);
             
-        // TODO
+        AssetAtlas::update(
+            $event->originalAsset->path(),
+            $event->newAsset->path(),
+            $event->originalAsset->container()->handle()
+        );
     }
     
     /**
      * Handle the asset saved event.
      * (This includes actions like moving an asset.)
-     * Update the atlas *before* the actual handler is called.
      */
     public function handleSaved(AssetSaved $event)
     {
-        $asset = $event->asset;
-        
-        AssetAtlas::update(
-            $asset->getOriginal('path'), 
-            $asset->path(), 
-            $asset->container()->handle()
-        );
+        $this->asset = $event->asset;
         
         parent::handleSaved($event);
-    }
-    
-    /**
-     * Replace asset references.
-     * This function is functionally identical to the parent 
-     * class and only stores the asset, so we can work with 
-     * it in `getItemsContainingData()` (see above).
-     *
-     * @param  \Statamic\Assets\Asset  $asset
-     * @param  string  $originalPath
-     * @param  string  $newPath
-     */
-    protected function replaceReferences($asset, $originalPath, $newPath)
-    {
-        $this->asset = $asset;
         
-        parent::replaceReferences($asset, $originalPath, $newPath);
+        AssetAtlas::update(
+            $this->asset->getOriginal('path'), 
+            $this->asset->path(), 
+            $this->asset->container()->handle()
+        );
     }
 }
