@@ -6,6 +6,7 @@ use Statamic\Providers\AddonServiceProvider;
 use Statamic\Fieldtypes\Assets\Assets as StatamicAssets;
 use Statamic\Listeners\UpdateAssetReferences as StatamicUpdateAssetReferences;
 use VV\AssetAtlas\Fieldtypes\Assets;
+use VV\AssetAtlas\Commands\Scan;
 
 class ServiceProvider extends AddonServiceProvider
 {   
@@ -22,6 +23,10 @@ class ServiceProvider extends AddonServiceProvider
     public function boot()
     {
         parent::boot();
+            
+        $this->commands([
+            Scan::class,
+        ]);
         
         if ($this->app->runningInConsole()) {
             $this->publishes([

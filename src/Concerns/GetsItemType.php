@@ -17,5 +17,7 @@ trait GetsItemType
             case $item instanceof GlobalSet: return 'global_set';
             case $item instanceof User: return 'user';
         }
+        
+        return null;
     }
 }

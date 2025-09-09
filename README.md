@@ -1,12 +1,18 @@
 # Asset Atlas
 
-Track where your Statamic assets are used, to make moving, replacing and deleting assets quick and easy.
+Track where your Statamic assets are used to make moving, replacing and deleting assets quick and easy.
 
 ## Requirements
 
 This package is based on using a database. It doesn't matter if you use the database for Statamic or not, but AssetAtlas tracks all asset references in entries, terms, global-sets and users as database records.
 
 ## How To Use
+
+Install the package:
+
+```
+composer require visuellverstehen/statamic-asset-atlas
+```
 
 Publish and run the required migration:
 
@@ -20,8 +26,10 @@ Now whenever you save an item that uses an asset field, the reference is tracked
 You can (and should) initialise the atlas using this command:
 
 ```
-TODO
+php please asset-atlas:scan
 ```
+
+As records will be updated, you can use this command regularly to keep AssetAtlas up to date.
 
 ## More about us
 
