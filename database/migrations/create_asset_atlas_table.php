@@ -6,23 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('asset_atlas', function (Blueprint $table) {
             $table->id();
-            $table->uuid('entry_id');
             $table->string('asset_path');
             $table->string('asset_container');
+            $table->uuid('item_id');
+            $table->string('item_type');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('asset_atlas');

@@ -13,6 +13,10 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this->app->bind(StatamicAssets::class, Assets::class);
         $this->app->bind(StatamicUpdateAssetReferences::class, UpdateAssetReferences::class);
+            
+        $this->app->singleton(Atlas::class, function () {
+            return new Atlas();
+        });
     }
     
     public function boot()

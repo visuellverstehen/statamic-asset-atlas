@@ -9,8 +9,9 @@ class AssetReference extends Model
     protected $table = 'asset_atlas';
     
     protected $fillable = [
-        'entry_id',
         'asset_path',
-        'asset_container'
+        'asset_container',
+        'item_id',
+        'item_type',
     ];
 }
