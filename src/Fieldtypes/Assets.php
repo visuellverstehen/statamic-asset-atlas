@@ -2,15 +2,14 @@
 
 namespace VV\AssetAtlas\Fieldtypes;
 
-use Statamic\Contracts\Auth\User;
-use Statamic\Contracts\Entries\Entry;
-use Statamic\Contracts\Globals\GlobalSet;
-use Statamic\Contracts\Taxonomies\Term;
 use Statamic\Fieldtypes\Assets\Assets as BaseFieldtype;
 use VV\AssetAtlas\AssetAtlas;
+use VV\AssetAtlas\Concerns\GetsItemType;
 
 class Assets extends BaseFieldtype
 {
+    use GetsItemType;
+    
     public function process($data)
     {
         $assetData = parent::process($data);
@@ -18,7 +17,7 @@ class Assets extends BaseFieldtype
         if (! empty($assetData)
             && ($parent = $this->field()?->parent())
             && ($container = $this->container())
-            && ($type = $this->getParentType($parent))
+            && ($type = $this->getItemType($parent))
         ) { 
             if (is_string($assetData)) {
                 AssetAtlas::store($assetData, $container->handle(), $parent->id(), $type);
@@ -28,15 +27,5 @@ class Assets extends BaseFieldtype
         }
         
         return $assetData;
-    }
-    
-    protected function getParentType($parent): ?string
-    {
-        switch (true) {
-            case $parent instanceof Entry: return 'entry';
-            case $parent instanceof Term: return 'term';
-            case $parent instanceof GlobalSet: return 'global_set';
-            case $parent instanceof User: return 'user';
-        }
     }
 }
