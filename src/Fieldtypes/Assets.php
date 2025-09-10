@@ -22,7 +22,8 @@ class Assets extends BaseFieldtype
             if (is_string($assetData)) {
                 AssetAtlas::store($assetData, $container->handle(), $parent->id(), $type);
             } else {
-                $assetData->each(fn ($assetPath) => AssetAtlas::store($assetPath, $container->handle(), $parent->id(), $type));
+                collect($assetData)
+                    ->each(fn ($assetPath) => AssetAtlas::store($assetPath, $container->handle(), $parent->id(), $type));
             }
         }
         
