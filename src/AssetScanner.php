@@ -54,22 +54,26 @@ class AssetScanner extends DataReferenceUpdater
                 $dottedKey = $dottedPrefix . $field->handle();
                 
                 if (
-                    ! ($value = Arr::get($data, $dottedKey)) || 
+                    ! ($path = Arr::get($data, $dottedKey)) || 
                     ! ($container = $this->getConfiguredAssetsFieldContainer($field))
                 ) {
                     return;
                 }
                 
-                if (is_string($value)) {
+                if (is_string($path)) {
                     AssetAtlas::store(
-                        $value,
+                        $path,
                         $container,
                         $this->item->id(),
                         $this->itemType
                     );
-                } else {
-                    // TODO
-                    ray($value)->red();
+                } else if (is_array($path)) {
+                    collect($path)->each(fn ($p) => AssetAtlas::store(
+                        $p,
+                        $container,
+                        $this->item->id(),
+                        $this->itemType
+                    ));
                 }
             });
         
