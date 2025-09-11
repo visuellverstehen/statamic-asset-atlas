@@ -12,12 +12,62 @@ class AssetScanner extends DataReferenceUpdater
     use GetsItemType;
     
     protected $itemType;
+    protected $checkOriginal = false;
+    
+    private $dataToScan;
+    private $atlasItems;
     
     public function scanForReferences()
     {   
+        $fields = $this->getTopLevelFields();
         $this->itemType = $this->getItemType($this->item);
         
-        $this->recursivelyUpdateFields($this->getTopLevelFields());
+        $this->atlasItems = collect([]);
+        $this->dataToScan = $this->item->data()->all();
+        $this->recursivelyUpdateFields($fields);
+        
+        // Add all collected items to atlas
+        $this->atlasItems->unique()->each(function ($item) {
+            [$container, $path] = explode('::', $item);
+            
+            AssetAtlas::store(
+                $path,
+                $container,
+                $this->item->id(),
+                $this->itemType
+            );
+        });
+        
+        // If activated, check the items original data
+        // to ensure to remove unused references.
+        if ($this->checkOriginal) {
+            $fromData = $this->atlasItems;
+            
+            $this->atlasItems = collect([]);
+            $this->dataToScan = $this->item->getOriginal();
+            $this->recursivelyUpdateFields($fields);
+            
+            $this->atlasItems
+                ->unique()
+                ->diffKeys($fromData)
+                ->each(function ($item) {
+                    [$container, $path] = explode('::', $item);
+                    
+                    AssetAtlas::remove($path, $container);
+                });
+        }
+    }
+    
+    public function checkOriginal($check = true)
+    {
+        $this->checkOriginal = $check;
+        
+        return $this;
+    }
+    
+    protected function push(string $container, string $path)
+    {
+        $this->atlasItems->push($container . '::' . $path);
     }
     
     protected function recursivelyUpdateFields($fields, $dottedPrefix = null)
@@ -45,35 +95,30 @@ class AssetScanner extends DataReferenceUpdater
             : null;
     }
     
-    private function scanAssetsFieldValues($fields, $dottedPrefix)
+    protected function getStatamicUrlFromStringValue(string $value)
     {
+        
+    }
+    
+    private function scanAssetsFieldValues($fields, $dottedPrefix)
+    {   
         $fields
             ->filter(fn ($field) => $field->type() === 'assets')
             ->each(function ($field) use ($dottedPrefix) {
-                $data = $this->item->data()->all();
                 $dottedKey = $dottedPrefix . $field->handle();
                 
                 if (
-                    ! ($path = Arr::get($data, $dottedKey)) || 
+                    ! ($path = Arr::get($this->dataToScan, $dottedKey)) || 
                     ! ($container = $this->getConfiguredAssetsFieldContainer($field))
                 ) {
                     return;
                 }
                 
                 if (is_string($path)) {
-                    AssetAtlas::store(
-                        $path,
-                        $container,
-                        $this->item->id(),
-                        $this->itemType
-                    );
+                    $this->push($container, $path);
                 } else if (is_array($path)) {
-                    collect($path)->each(fn ($p) => AssetAtlas::store(
-                        $p,
-                        $container,
-                        $this->item->id(),
-                        $this->itemType
-                    ));
+                    collect($path)
+                    ->each(fn ($p) => $this->push($container, $p));
                 }
             });
         
@@ -81,15 +126,42 @@ class AssetScanner extends DataReferenceUpdater
     }
     
     private function scanLinkFieldValues($fields, $dottedPrefix)
-    {
-        // TODO
+    {   
+        $fields
+            ->filter(fn ($field) => $field->type() === 'link')
+            ->each(function ($field) use ($dottedPrefix) {
+                $dottedKey = $dottedPrefix . $field->handle();
+                
+                $value = Arr::get($this->dataToScan, $dottedKey);
+                    
+                if (! is_string($value) || ! str_contains($value, "asset::")) {
+                    return;
+                }
+                
+                $assetData = explode('::', $value);
+                $this->push($assetData[1], $assetData[2]);
+            });
         
         return $this;
     }
     
     private function scanBardFieldValues($fields, $dottedPrefix)
-    {
-        // TODO
+    {   
+        $fields
+            ->filter(fn ($field) => $field->type() === 'bard')
+            ->each(function ($field) use ($dottedPrefix) {
+                $dottedKey = $dottedPrefix . $field->handle();
+                
+                if (! $value = Arr::get($this->dataToScan, $dottedKey)) {
+                    return;
+                }
+                
+                if (is_string($value)) {
+                    // TODO
+                } else {
+                    // TODO
+                }
+            });
         
         return $this;
     }
