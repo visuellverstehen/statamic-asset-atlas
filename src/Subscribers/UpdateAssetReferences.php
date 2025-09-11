@@ -1,11 +1,12 @@
 <?php
 
-namespace VV\AssetAtlas;
+namespace VV\AssetAtlas\Subscribers;
 
 use Statamic\Events\AssetDeleted;
 use Statamic\Events\AssetReplaced;
 use Statamic\Events\AssetSaved;
 use Statamic\Listeners\UpdateAssetReferences as BaseListener;
+use VV\AssetAtlas\AssetAtlas;
 
 class UpdateAssetReferences extends BaseListener
 {

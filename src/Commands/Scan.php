@@ -16,10 +16,12 @@ class Scan extends Command
     
     public function handle()
     {
+        // TODO: add `clear` param that clears the atlas first
+        
         $this->getItemsContainingData()
             ->each(function ($item) {
                 AssetScanner::item($item)
-                    ->scanForReferences();
+                    ->addReferences();
             });
     }
     

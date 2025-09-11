@@ -17,15 +17,30 @@ class AssetScanner extends DataReferenceUpdater
     private $dataToScan;
     private $atlasItems;
     
-    public function scanForReferences()
+    public function checkOriginal($check = true)
+    {
+        $this->checkOriginal = $check;
+        
+        return $this;
+    }
+    
+    public function removeReferences()
+    {
+        $this->findReferences();
+        
+        $this->atlasItems->unique()->each(function ($item) {
+            [$container, $path] = explode('::', $item);
+            
+            AssetAtlas::remove($path, $container, $this->item->id());
+        });
+    }
+    
+    public function addReferences()
     {   
-        $fields = $this->getTopLevelFields();
         $itemType = $this->getItemType($this->item);
         $itemId = $this->item->id();
         
-        $this->atlasItems = collect([]);
-        $this->dataToScan = $this->item->data()->all();
-        $this->recursivelyUpdateFields($fields);
+        $this->findReferences();
         
         // Add all collected items to atlas
         $this->atlasItems->unique()->each(function ($item) use ($itemType, $itemId) {
@@ -38,10 +53,7 @@ class AssetScanner extends DataReferenceUpdater
         // to ensure to remove unused references.
         if ($this->checkOriginal) {
             $fromData = $this->atlasItems;
-            
-            $this->atlasItems = collect([]);
-            $this->dataToScan = $this->item->getOriginal();
-            $this->recursivelyUpdateFields($fields);
+            $this->findReferences($this->item->getOriginal());
             
             $this->atlasItems
                 ->unique()
@@ -54,11 +66,11 @@ class AssetScanner extends DataReferenceUpdater
         }
     }
     
-    public function checkOriginal($check = true)
+    protected function findReferences($source = null): void
     {
-        $this->checkOriginal = $check;
-        
-        return $this;
+        $this->atlasItems = collect([]);
+        $this->dataToScan = $source ?? $this->item->data()->all();
+        $this->recursivelyUpdateFields($this->getTopLevelFields());
     }
     
     protected function push(string $container, string $path)

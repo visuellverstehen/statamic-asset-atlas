@@ -3,16 +3,14 @@
 namespace VV\AssetAtlas;
 
 use Statamic\Providers\AddonServiceProvider;
-use Statamic\Fieldtypes\Assets\Assets as StatamicAssets;
 use Statamic\Listeners\UpdateAssetReferences as StatamicUpdateAssetReferences;
-use VV\AssetAtlas\Fieldtypes\Assets;
 use VV\AssetAtlas\Commands\Scan;
+use VV\AssetAtlas\Subscribers\UpdateAssetReferences;
 
 class ServiceProvider extends AddonServiceProvider
 {   
     public function register()
     {
-        $this->app->bind(StatamicAssets::class, Assets::class);
         $this->app->bind(StatamicUpdateAssetReferences::class, UpdateAssetReferences::class);
             
         $this->app->singleton(Atlas::class, function () {
