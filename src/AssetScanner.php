@@ -20,22 +20,18 @@ class AssetScanner extends DataReferenceUpdater
     public function scanForReferences()
     {   
         $fields = $this->getTopLevelFields();
-        $this->itemType = $this->getItemType($this->item);
+        $itemType = $this->getItemType($this->item);
+        $itemId = $this->item->id();
         
         $this->atlasItems = collect([]);
         $this->dataToScan = $this->item->data()->all();
         $this->recursivelyUpdateFields($fields);
         
         // Add all collected items to atlas
-        $this->atlasItems->unique()->each(function ($item) {
+        $this->atlasItems->unique()->each(function ($item) use ($itemType, $itemId) {
             [$container, $path] = explode('::', $item);
             
-            AssetAtlas::store(
-                $path,
-                $container,
-                $this->item->id(),
-                $this->itemType
-            );
+            AssetAtlas::store($path, $container, $itemId, $itemType);
         });
         
         // If activated, check the items original data
@@ -50,10 +46,10 @@ class AssetScanner extends DataReferenceUpdater
             $this->atlasItems
                 ->unique()
                 ->diffKeys($fromData)
-                ->each(function ($item) {
+                ->each(function ($item) use ($itemId) {
                     [$container, $path] = explode('::', $item);
                     
-                    AssetAtlas::remove($path, $container);
+                    AssetAtlas::remove($path, $container, $itemId);
                 });
         }
     }

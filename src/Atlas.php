@@ -56,11 +56,28 @@ class Atlas
             ->map(fn ($ref) => User::find($ref->item_id));
     }
     
-    public function remove(string $assetPath, string $containerHandle): void
+    public function remove(string $assetPath, string $containerHandle, string $itemId)
     {
-        $this
-            ->find($assetPath, $containerHandle)
-            ->each(fn ($item) => $item->delete());
+        AssetReference::query()
+            ->where('asset_path', $assetPath)
+            ->where('asset_container', $containerHandle)
+            ->where('item_id', $itemId)
+            ->delete();
+    }
+    
+    public function removeAllByAsset(string $assetPath, string $containerHandle): void
+    {
+        AssetReference::query()
+            ->where('asset_path', $assetPath)
+            ->where('asset_container', $containerHandle)
+            ->delete();
+    }
+    
+    public function removeAllByItem(string $itemId): void
+    {
+        AssetReference::query()
+            ->where('item_id', $itemId)
+            ->delete();
     }
     
     public function store(string $assetPath, string $containerHandle, string $itemId, string $itemType): void
