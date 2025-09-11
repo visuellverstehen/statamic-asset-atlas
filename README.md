@@ -4,7 +4,7 @@ Track where your Statamic assets are used to make moving, replacing and deleting
 
 ## Requirements
 
-This package is based on using a database. It doesn't matter if you use the database for Statamic or not, but AssetAtlas tracks all asset references in entries, terms, global-sets and users as database records.
+This package is based on using a database. It doesn't matter if you use the database for Statamic or not, but AssetAtlas tracks all asset references in entries, terms, global-sets and users as database records. This can be a simple SQLite database as it is preset in current Laravel installations.
 
 ## How To Use
 
