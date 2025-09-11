@@ -95,9 +95,52 @@ class AssetScanner extends DataReferenceUpdater
             : null;
     }
     
-    protected function getStatamicUrlFromStringValue(string $value)
+    protected function findAssetsInImageNodes($bardValue)
     {
+        collect(Arr::dot($bardValue))
+            ->filter(function ($value, $key) {
+                // Only keep image nodes and get their dotted path within the node
+                return preg_match('/(.*)\.(type)/', $key) && $value === 'image';
+            })
+            ->each(function ($value, $key) use ($bardValue) {
+                // Modify the dotted path to fetch the asset src from the node
+                $key = str_replace('.type', '.attrs.src', $key);
+                $asset = Arr::get($bardValue, $key);
+                
+                // Extract data (asset is stored as `asset::{container}::{path})
+                $assetData = explode('::', $asset);
+                $this->push($assetData[1], $assetData[2]);
+            });
+    }
+    
+    protected function findAssetsInLinkNodes($bardValue)
+    {
+        collect(Arr::dot($bardValue))
+            ->filter(function ($value, $key) {
+                // Only keep link nodes and get their dotted path within the node
+                return preg_match('/(.*)\.(type)/', $key) && $value === 'link';
+            })
+            ->each(function ($value, $key) use ($bardValue) {
+                // Modify the dotted path to fetch the asset src from the node
+                $key = str_replace('.type', '.attrs.href', $key);
+                $asset = Arr::get($bardValue, $key);
+                
+                // Extract data (asset is stored as `statamic://asset::{container}::{path})
+                $assetData = str_replace('statamic://asset::', '', $asset);
+                $assetData = explode('::', $assetData);
+                $this->push($assetData[0], $assetData[1]);
+            });
+    }
+    
+    protected function findAssetsInStringValue(string $value)
+    {
+        if (! preg_match_all('/[("]statamic:\/\/asset::([^()"]*)::([^)"]*)[)"]/im', $value, $matches)) {
+            return;
+        }
         
+        foreach ($matches[1] as $index => $container) {
+            $this->push($container, $matches[2][$index]);
+        }
     }
     
     private function scanAssetsFieldValues($fields, $dottedPrefix)
@@ -157,9 +200,10 @@ class AssetScanner extends DataReferenceUpdater
                 }
                 
                 if (is_string($value)) {
-                    // TODO
+                    $this->findAssetsInStringValue($value);
                 } else {
-                    // TODO
+                    $this->findAssetsInImageNodes($value);
+                    $this->findAssetsInLinkNodes($value);
                 }
             });
         
@@ -168,7 +212,15 @@ class AssetScanner extends DataReferenceUpdater
     
     private function scanMarkdownFieldValues($fields, $dottedPrefix)
     {
-        // TODO
+        $fields
+            ->filter(fn ($field) => $field->type() === 'markdown')
+            ->each(function ($field) use ($dottedPrefix) {
+                $dottedKey = $dottedPrefix . $field->handle();
+                
+                if ($value = Arr::get($this->dataToScan, $dottedKey)) {
+                    $this->findAssetsInStringValue($value);
+                }
+            });
         
         return $this;
     }
