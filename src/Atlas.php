@@ -5,14 +5,14 @@ namespace VV\AssetAtlas;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use Statamic\Facades\Entry;
-use Statamic\Facades\GlobalSet;
+use Statamic\Facades\GlobalVariables;
 use Statamic\Facades\Term;
 use Statamic\Facades\User;
 
 class Atlas
 {
     protected $lazyThreshold = 500;
-    protected $itemTypes = ['entry', 'term', 'global_set', 'user'];
+    protected $itemTypes = ['entry', 'term', 'global_var', 'user'];
     
     public function find(string $assetPath, string $containerHandle, ?string $itemType = null): Collection|LazyCollection
     {   
@@ -35,11 +35,11 @@ class Atlas
             ->map(fn ($ref) => Entry::find($ref->item_id));
     }
     
-    public function findGlobalSet(string $assetPath, string $containerHandle): Collection|LazyCollection
+    public function findGlobalVar(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
         return $this
-            ->find($assetPath, $containerHandle, 'global_set')
-            ->map(fn ($ref) => GlobalSet::find($ref->item_id));
+            ->find($assetPath, $containerHandle, 'global_var')
+            ->map(fn ($ref) => GlobalVariables::find($ref->item_id));
     }
     
     public function findTerms(string $assetPath, string $containerHandle): Collection|LazyCollection

@@ -11,8 +11,9 @@ class AssetScanner extends DataReferenceUpdater
 {   
     use GetsItemType;
     
-    protected $itemType;
     protected $checkOriginal = false;
+    protected $itemType;
+    protected $originalData;
     
     private $dataToScan;
     private $atlasItems;
@@ -24,7 +25,7 @@ class AssetScanner extends DataReferenceUpdater
         return $this;
     }
     
-    public function removeReferences()
+    public function removeReferences(): void
     {
         $this->findReferences();
         
@@ -35,8 +36,8 @@ class AssetScanner extends DataReferenceUpdater
         });
     }
     
-    public function addReferences()
-    {   
+    public function addReferences(): void
+    {
         $itemType = $this->getItemType($this->item);
         $itemId = $this->item->id();
         
@@ -53,7 +54,7 @@ class AssetScanner extends DataReferenceUpdater
         // to ensure to remove unused references.
         if ($this->checkOriginal) {
             $fromData = $this->atlasItems;
-            $this->findReferences($this->item->getOriginal());
+            $this->findReferences($this->getOriginal());
             
             $this->atlasItems
                 ->unique()
@@ -64,6 +65,24 @@ class AssetScanner extends DataReferenceUpdater
                     AssetAtlas::remove($path, $container, $itemId);
                 });
         }
+    }
+    
+    public function getOriginal()
+    {
+        if ($this->originalData) {
+            return $this->originalData;
+        }
+        
+        if (method_exists($this->item, 'getOriginal')) {
+            return $this->item->getOriginal();
+        }
+    }
+    
+    public function setOriginal($original): self
+    {
+        $this->originalData = $original;
+        
+        return $this;
     }
     
     protected function findReferences($source = null): void
