@@ -21,7 +21,7 @@ php artisan vendor:publish --tag=asset_atlas_migrations
 php artisan migrate
 ```
 
-Now whenever you save an item that uses an asset field, the reference is tracked in AssetAtlas. On moving, deleting or replacing an asset, AssetAtlas provides all references of the asset instead of the original logic checking all available items for a reference.
+Now whenever you save an item that relates to asset, the reference is tracked in AssetAtlas. On moving, deleting or replacing an asset, AssetAtlas provides all references to the asset instead of the base Statamic logic of checking all possible items.
 
 You can (and should) initialise the atlas using this command:
 
@@ -29,7 +29,7 @@ You can (and should) initialise the atlas using this command:
 php please asset-atlas:scan
 ```
 
-As records will be updated, you can use this command regularly to keep AssetAtlas up to date.
+As records will be updated, you can use this command regularly to keep AssetAtlas up to date. Note however that this command currently doesn't remove unused references.
 
 ## More about us
 
