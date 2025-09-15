@@ -133,6 +133,10 @@ class AssetScanner extends DataReferenceUpdater
                 // Modify the dotted path to fetch the asset src from the node
                 $key = str_replace('.type', '.attrs.src', $key);
                 $asset = Arr::get($bardValue, $key);
+                    
+                if (! str_contains($asset, 'asset::')) {
+                    return;
+                }
                 
                 // Extract data (asset is stored as `asset::{container}::{path})
                 $assetData = explode('::', $asset);
@@ -151,6 +155,10 @@ class AssetScanner extends DataReferenceUpdater
                 // Modify the dotted path to fetch the asset src from the node
                 $key = str_replace('.type', '.attrs.href', $key);
                 $asset = Arr::get($bardValue, $key);
+                    
+                if (! str_contains($asset, 'statamic://asset::')) {
+                    return;
+                }
                 
                 // Extract data (asset is stored as `statamic://asset::{container}::{path})
                 $assetData = str_replace('statamic://asset::', '', $asset);
