@@ -26,11 +26,9 @@ class UpdateAssetReferences extends BaseListener
             return parent::getItemsContainingData();
         }
         
-        // TODO: get other stuff apart from entries
-        
         // Get all items using the atlas, based on the 
         // OLD path, so *before* updating the atlas.
-        return AssetAtlas::findEntries($this->asset->getOriginal('path'), $this->asset->container()?->handle());
+        return AssetAtlas::findAll($this->asset->getOriginal('path'), $this->asset->container()?->handle());
     }
     
     /**

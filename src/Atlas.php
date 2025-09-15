@@ -29,6 +29,19 @@ class Atlas
             : $query->get();
     }
     
+    public function findAll(string $assetPath, string $containerHandle): Collection|LazyCollection
+    {   
+        return $this->find($assetPath, $containerHandle)
+            ->map(function ($ref)  {
+                return match ($ref->item_type) {
+                    'entry'         => Entry::find($ref->item_id),
+                    'global_var'    => GlobalVariables::find($ref->item_id),
+                    'term'          => Term::find($ref->item_id),
+                    'user'          => User::find($ref->item_id),
+                };
+            });
+    }
+    
     public function findEntries(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
         return $this->find($assetPath, $containerHandle, 'entry')
