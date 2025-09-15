@@ -39,9 +39,13 @@ class UpdateAssetReferences extends BaseListener
     public function handleDeleted(AssetDeleted $event)
     {   
         $this->asset = $event->asset;
-        
-        parent::handleDeleted($event);
-        
+
+        // Disable the TrackAssetReferences subscriber so we
+        // don't get duplicate Atlas entries.
+        TrackAssetReferences::withoutListeners(function () use ($event) {
+            parent::handleDeleted($event);
+        });
+
         AssetAtlas::removeAllByAsset(
             $this->asset->getOriginal('path'),
             $this->asset->container()->handle()
@@ -54,9 +58,13 @@ class UpdateAssetReferences extends BaseListener
     public function handleReplaced(AssetReplaced $event)
     {   
         $this->asset = $event->originalAsset;
-        
-        parent::handleReplaced($event);
-            
+
+        // Disable the TrackAssetReferences subscriber so we
+        // don't get duplicate Atlas entries.
+        TrackAssetReferences::withoutListeners(function () use ($event) {
+            parent::handleReplaced($event);
+        });
+
         AssetAtlas::update(
             $event->originalAsset->path(),
             $event->newAsset->path(),
@@ -72,7 +80,11 @@ class UpdateAssetReferences extends BaseListener
     {
         $this->asset = $event->asset;
         
-        parent::handleSaved($event);
+        // Disable the TrackAssetReferences subscriber so we
+        // don't get duplicate Atlas entries.
+        TrackAssetReferences::withoutListeners(function () use ($event) {
+            parent::handleSaved($event);
+        });
         
         AssetAtlas::update(
             $this->asset->getOriginal('path'), 
