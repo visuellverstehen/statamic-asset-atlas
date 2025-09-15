@@ -42,7 +42,7 @@ class UpdateAssetReferences extends BaseListener
         
         parent::handleDeleted($event);
         
-        AssetAtlas::remove(
+        AssetAtlas::removeAllByAsset(
             $this->asset->getOriginal('path'),
             $this->asset->container()->handle()
         );
