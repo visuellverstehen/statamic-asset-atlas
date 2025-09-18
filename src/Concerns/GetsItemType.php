@@ -17,7 +17,7 @@ trait GetsItemType
             case $item instanceof Variables: return 'global_var';
             case $item instanceof User: return 'user';
         }
-        
+
         return null;
     }
 }

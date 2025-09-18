@@ -8,99 +8,102 @@ use Statamic\Facades\AssetContainer;
 use VV\AssetAtlas\Concerns\GetsItemType;
 
 class AssetScanner extends DataReferenceUpdater
-{   
+{
     use GetsItemType;
-    
+
     protected $checkOriginal = false;
+
     protected $itemType;
+
     protected $originalData;
-    
+
     private $dataToScan;
+
     private $atlasItems;
-    
+
     public function checkOriginal($check = true)
     {
         $this->checkOriginal = $check;
-        
+
         return $this;
     }
-    
+
     public function removeReferences(): void
     {
         $this->findReferences();
-        
+
         $this->atlasItems->unique()->each(function ($item) {
             [$container, $path] = explode('::', $item);
-            
+
             AssetAtlas::remove($path, $container, $this->item->id());
         });
     }
-    
+
     public function addReferences(): void
     {
         $itemType = $this->getItemType($this->item);
         $itemId = $this->item->id();
-        
+
         $this->findReferences();
-        
+
         // Add all collected items to atlas
         $this->atlasItems->unique()->each(function ($item) use ($itemType, $itemId) {
             [$container, $path] = explode('::', $item);
-            
+
             AssetAtlas::store($path, $container, $itemId, $itemType);
         });
-        
+
         // If activated, check the items original data
         // to ensure to remove unused references.
         if ($this->checkOriginal) {
             $fromData = $this->atlasItems;
             $this->findReferences($this->getOriginal());
-            
+
             $this->atlasItems
                 ->unique()
                 ->diffKeys($fromData)
                 ->each(function ($item) use ($itemId) {
                     [$container, $path] = explode('::', $item);
-                    
+
                     AssetAtlas::remove($path, $container, $itemId);
                 });
         }
     }
-    
+
     public function getOriginal()
     {
         if ($this->originalData) {
             return $this->originalData;
         }
-        
+
         if (method_exists($this->item, 'getOriginal')) {
             return $this->item->getOriginal();
         }
     }
-    
+
     public function setOriginal($original): self
     {
         $this->originalData = $original;
-        
+
         return $this;
     }
-    
+
     protected function findReferences($source = null): void
     {
         $this->atlasItems = collect([]);
         $this->dataToScan = $source ?? $this->item->data()->all();
         $this->recursivelyUpdateFields($this->getTopLevelFields());
     }
-    
+
     protected function push(string $container, string $path)
     {
-        $this->atlasItems->push($container . '::' . $path);
+        $this->atlasItems->push($container.'::'.$path);
     }
-    
+
     protected function recursivelyUpdateFields($fields, $dottedPrefix = null)
     {
         // Using this function to scan all items for asset references
-        
+
         $this
             ->scanAssetsFieldValues($fields, $dottedPrefix)
             ->scanLinkFieldValues($fields, $dottedPrefix)
@@ -108,20 +111,20 @@ class AssetScanner extends DataReferenceUpdater
             ->scanMarkdownFieldValues($fields, $dottedPrefix)
             ->updateNestedFieldValues($fields, $dottedPrefix);
     }
-    
+
     protected function getConfiguredAssetsFieldContainer($field)
     {
         if ($container = $field->get('container')) {
             return $container;
         }
-    
+
         $containers = AssetContainer::all();
-    
+
         return $containers->count() === 1
             ? $containers->first()->handle()
             : null;
     }
-    
+
     protected function findAssetsInImageNodes($bardValue)
     {
         collect(Arr::dot($bardValue))
@@ -133,17 +136,17 @@ class AssetScanner extends DataReferenceUpdater
                 // Modify the dotted path to fetch the asset src from the node
                 $key = str_replace('.type', '.attrs.src', $key);
                 $asset = Arr::get($bardValue, $key);
-                    
+
                 if (! str_contains($asset, 'asset::')) {
                     return;
                 }
-                
+
                 // Extract data (asset is stored as `asset::{container}::{path})
                 $assetData = explode('::', $asset);
                 $this->push($assetData[1], $assetData[2]);
             });
     }
-    
+
     protected function findAssetsInLinkNodes($bardValue)
     {
         collect(Arr::dot($bardValue))
@@ -155,85 +158,85 @@ class AssetScanner extends DataReferenceUpdater
                 // Modify the dotted path to fetch the asset src from the node
                 $key = str_replace('.type', '.attrs.href', $key);
                 $asset = Arr::get($bardValue, $key);
-                    
+
                 if (! str_contains($asset, 'statamic://asset::')) {
                     return;
                 }
-                
+
                 // Extract data (asset is stored as `statamic://asset::{container}::{path})
                 $assetData = str_replace('statamic://asset::', '', $asset);
                 $assetData = explode('::', $assetData);
                 $this->push($assetData[0], $assetData[1]);
             });
     }
-    
+
     protected function findAssetsInStringValue(string $value)
     {
         if (! preg_match_all('/[("]statamic:\/\/asset::([^()"]*)::([^)"]*)[)"]/im', $value, $matches)) {
             return;
         }
-        
+
         foreach ($matches[1] as $index => $container) {
             $this->push($container, $matches[2][$index]);
         }
     }
-    
+
     private function scanAssetsFieldValues($fields, $dottedPrefix)
-    {   
+    {
         $fields
             ->filter(fn ($field) => $field->type() === 'assets')
             ->each(function ($field) use ($dottedPrefix) {
-                $dottedKey = $dottedPrefix . $field->handle();
-                
+                $dottedKey = $dottedPrefix.$field->handle();
+
                 if (
-                    ! ($path = Arr::get($this->dataToScan, $dottedKey)) || 
+                    ! ($path = Arr::get($this->dataToScan, $dottedKey)) ||
                     ! ($container = $this->getConfiguredAssetsFieldContainer($field))
                 ) {
                     return;
                 }
-                
+
                 if (is_string($path)) {
                     $this->push($container, $path);
-                } else if (is_array($path)) {
+                } elseif (is_array($path)) {
                     collect($path)
-                    ->each(fn ($p) => $this->push($container, $p));
+                        ->each(fn ($p) => $this->push($container, $p));
                 }
             });
-        
+
         return $this;
     }
-    
+
     private function scanLinkFieldValues($fields, $dottedPrefix)
-    {   
+    {
         $fields
             ->filter(fn ($field) => $field->type() === 'link')
             ->each(function ($field) use ($dottedPrefix) {
-                $dottedKey = $dottedPrefix . $field->handle();
-                
+                $dottedKey = $dottedPrefix.$field->handle();
+
                 $value = Arr::get($this->dataToScan, $dottedKey);
-                    
-                if (! is_string($value) || ! str_contains($value, "asset::")) {
+
+                if (! is_string($value) || ! str_contains($value, 'asset::')) {
                     return;
                 }
-                
+
                 $assetData = explode('::', $value);
                 $this->push($assetData[1], $assetData[2]);
             });
-        
+
         return $this;
     }
-    
+
     private function scanBardFieldValues($fields, $dottedPrefix)
-    {   
+    {
         $fields
             ->filter(fn ($field) => $field->type() === 'bard')
             ->each(function ($field) use ($dottedPrefix) {
-                $dottedKey = $dottedPrefix . $field->handle();
-                
+                $dottedKey = $dottedPrefix.$field->handle();
+
                 if (! $value = Arr::get($this->dataToScan, $dottedKey)) {
                     return;
                 }
-                
+
                 if (is_string($value)) {
                     $this->findAssetsInStringValue($value);
                 } else {
@@ -241,22 +244,22 @@ class AssetScanner extends DataReferenceUpdater
                     $this->findAssetsInLinkNodes($value);
                 }
             });
-        
+
         return $this;
     }
-    
+
     private function scanMarkdownFieldValues($fields, $dottedPrefix)
     {
         $fields
             ->filter(fn ($field) => $field->type() === 'markdown')
             ->each(function ($field) use ($dottedPrefix) {
-                $dottedKey = $dottedPrefix . $field->handle();
-                
+                $dottedKey = $dottedPrefix.$field->handle();
+
                 if ($value = Arr::get($this->dataToScan, $dottedKey)) {
                     $this->findAssetsInStringValue($value);
                 }
             });
-        
+
         return $this;
     }
 }

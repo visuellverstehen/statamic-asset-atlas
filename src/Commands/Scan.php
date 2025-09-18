@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace VV\AssetAtlas\Commands;
 
@@ -9,22 +9,23 @@ use VV\AssetAtlas\AssetScanner;
 
 class Scan extends Command
 {
-    use RunsInPlease, GetsItemsContainingData;
-    
+    use GetsItemsContainingData, RunsInPlease;
+
     protected $signature = 'statamic:asset-atlas:scan';
+
     protected $description = 'Adds all asset references to AssetAtlas';
-    
+
     public function handle()
     {
         // TODO: add `clear` param that clears the atlas first
-        
+
         $this->getItemsContainingData()
             ->each(function ($item) {
                 AssetScanner::item($item)
                     ->addReferences();
             });
     }
-    
+
     protected function getTopLevelFields($item)
     {
         return $item->blueprint()->fields()->all();

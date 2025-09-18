@@ -11,7 +11,7 @@ use VV\AssetAtlas\AssetAtlas;
 class UpdateAssetReferences extends BaseListener
 {
     protected $asset;
-    
+
     /**
      * Get all items that contain an asset.
      * Try to use AssetAtlas, if required data is available
@@ -20,22 +20,22 @@ class UpdateAssetReferences extends BaseListener
      * @return \Illuminate\Support\Collection|\Illuminate\Support\LazyCollection
      */
     public function getItemsContainingData()
-    {       
+    {
         // If we don't have a stored asset, fallback to original function.
         if (! $this->asset) {
             return parent::getItemsContainingData();
         }
-        
-        // Get all items using the atlas, based on the 
+
+        // Get all items using the atlas, based on the
         // OLD path, so *before* updating the atlas.
         return AssetAtlas::findAll($this->asset->getOriginal('path'), $this->asset->container()?->handle());
     }
-    
+
     /**
      * Handle the asset deleted event.
      */
     public function handleDeleted(AssetDeleted $event)
-    {   
+    {
         $this->asset = $event->asset;
 
         // Disable the TrackAssetReferences subscriber so we
@@ -49,12 +49,12 @@ class UpdateAssetReferences extends BaseListener
             $this->asset->container()->handle()
         );
     }
-    
+
     /**
      * Handle the asset replaced event.
      */
     public function handleReplaced(AssetReplaced $event)
-    {   
+    {
         $this->asset = $event->originalAsset;
 
         // Disable the TrackAssetReferences subscriber so we
@@ -69,7 +69,7 @@ class UpdateAssetReferences extends BaseListener
             $event->originalAsset->container()->handle()
         );
     }
-    
+
     /**
      * Handle the asset saved event.
      * (This includes actions like moving an asset.)
@@ -77,16 +77,16 @@ class UpdateAssetReferences extends BaseListener
     public function handleSaved(AssetSaved $event)
     {
         $this->asset = $event->asset;
-        
+
         // Disable the TrackAssetReferences subscriber so we
         // don't get duplicate Atlas entries.
         TrackAssetReferences::withoutListeners(function () use ($event) {
             parent::handleSaved($event);
         });
-        
+
         AssetAtlas::update(
-            $this->asset->getOriginal('path'), 
-            $this->asset->path(), 
+            $this->asset->getOriginal('path'),
+            $this->asset->path(),
             $this->asset->container()->handle()
         );
     }

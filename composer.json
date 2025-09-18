@@ -34,7 +34,8 @@
         "laravel/framework": "^11 || ^12"
     },
     "require-dev": {
-        "spatie/laravel-ray": "^1.40"
+        "spatie/laravel-ray": "^1.40",
+        "laravel/pint": "^1.25"
     },
     "config": {
         "allow-plugins": {
