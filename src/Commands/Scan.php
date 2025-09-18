@@ -5,12 +5,12 @@ namespace VV\AssetAtlas\Commands;
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
 use Statamic\Listeners\Concerns\GetsItemsContainingData;
-use VV\AssetAtlas\AssetScanner;
 use VV\AssetAtlas\AssetReference;
+use VV\AssetAtlas\AssetScanner;
 
 class Scan extends Command
 {
-    use RunsInPlease, GetsItemsContainingData;
+    use GetsItemsContainingData, RunsInPlease;
 
     protected $signature = 'statamic:asset-atlas:scan
                             {--reset : Clear the entire atlas before scanning}
@@ -33,6 +33,7 @@ class Scan extends Command
 
         if ($totalItems === 0) {
             $this->info('No content items found to scan.');
+
             return;
         }
 
@@ -51,7 +52,7 @@ class Scan extends Command
         $newReferenceCount = AssetReference::count();
         $referencesAdded = $newReferenceCount - $referenceCount;
 
-        $this->info("✓ Scan complete!");
+        $this->info('✓ Scan complete!');
         $this->info("  • Processed {$processedCount} items");
         $this->info("  • Asset references in atlas: {$newReferenceCount}");
 
@@ -69,6 +70,7 @@ class Scan extends Command
 
         if ($count === 0) {
             $this->info('Atlas is already empty.');
+
             return;
         }
 
