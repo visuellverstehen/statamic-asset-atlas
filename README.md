@@ -6,7 +6,7 @@ Track where your Statamic assets are used to make moving, replacing and deleting
 
 This package is based on using a database. It doesn't matter if you use the database for Statamic or not, but AssetAtlas tracks all asset references in entries, terms, global-sets and users as database records. This can be a simple SQLite database as it is preset in current Laravel installations.
 
-## How To Use
+## How to use
 
 Install the package:
 
@@ -21,7 +21,7 @@ php artisan vendor:publish --tag=asset_atlas_migrations
 php artisan migrate
 ```
 
-Now whenever you save an item that relates to asset, the reference is tracked in AssetAtlas. On moving, deleting or replacing an asset, AssetAtlas provides all references to the asset instead of the base Statamic logic of checking all possible items.
+Now whenever you save an item that relates to an asset, the reference is tracked in AssetAtlas. On moving, deleting or replacing an asset, AssetAtlas provides all references to the asset instead of the base Statamic logic of checking all possible items.
 
 You can (and should) initialise the atlas using this command:
 
@@ -29,11 +29,23 @@ You can (and should) initialise the atlas using this command:
 php please asset-atlas:scan
 ```
 
+To clear the atlas before scanning, use the `reset` parameter:
+
+```
+php please asset-atlas:scan --reset
+
+// Use (the) force if you don't want to bother with confirmation dialogues:
+php please asset-atlas:scan --reset --force
+```
+
 As records will be updated, you can use this command regularly to keep AssetAtlas up to date. Note however that this command currently doesn't remove unused references.
 
 ## More about us
 
+At **visuellverstehen** we create innovative digital and design solutions with a special focus on the common good. With technical expertise, high creativity and strategic skills, we develop products with a personal character.
+
 - [www.visuellverstehen.de](https://visuellverstehen.de)
+- [www.visuellverstehen.de/en](https://visuellverstehen.de/en)
 
 ## License
 The MIT license (MIT). Please take a look at the [license file](LICENSE.md) for more information.
