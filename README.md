@@ -10,13 +10,13 @@ This package is based on using a database. It doesn't matter if you use the data
 
 Install the package:
 
-```
+```bash
 composer require visuellverstehen/statamic-asset-atlas
 ```
 
 Publish and run the required migration:
 
-```
+```bash
 php artisan vendor:publish --tag=asset_atlas_migrations
 php artisan migrate
 ```
@@ -25,20 +25,18 @@ Now whenever you save an item that relates to an asset, the reference is tracked
 
 You can (and should) initialise the atlas using this command:
 
-```
+```bash
 php please asset-atlas:scan
 ```
 
-To clear the atlas before scanning, use the `reset` parameter:
+As records will be updated, you can use this command regularly to keep AssetAtlas up to date. Note that this command currently doesn't remove unused references. However, you can clear the atlas before scanning by using the `reset` parameter:
 
-```
+```bash
 php please asset-atlas:scan --reset
 
-// Use (the) force if you don't want to bother with confirmation dialogues:
+# Use (the) force if you don't want to bother with confirmation dialogues:
 php please asset-atlas:scan --reset --force
 ```
-
-As records will be updated, you can use this command regularly to keep AssetAtlas up to date. Note however that this command currently doesn't remove unused references.
 
 ## More about us
 
