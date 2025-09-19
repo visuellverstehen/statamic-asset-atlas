@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Support\Facades\DB;
+
+it('tracks multiple assets in single assets field', function () {
+    $asset1 = $this->createTestAsset('test-multiple-1.jpg');
+    $asset2 = $this->createTestAsset('test-multiple-2.jpg');
+    $asset1->save();
+    $asset2->save();
+
+    $entry = $this->createEntryWithTopLevelAsset('assets_field', [$asset1->path(), $asset2->path()]);
+    $entry->save();
+
+    expect($entry)->toBeTrackedFor($asset1, 1);
+    expect($entry)->toBeTrackedFor($asset2, 1);
+
+    // Verify total count for this entry
+    $totalReferences = DB::table('asset_atlas')
+        ->where('item_id', $entry->id())
+        ->count();
+
+    expect($totalReferences)->toBe(2);
+});

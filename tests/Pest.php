@@ -40,18 +40,6 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function createTestAsset(string $filename = 'test-image.jpg', string $container = 'assets'): \Statamic\Assets\Asset
-{
-    $assetContainer = \Statamic\Facades\AssetContainer::findByHandle($container);
-    \Illuminate\Support\Facades\Storage::disk('test_disk')->put($filename, 'fake image content');
-
-    $asset = new \Statamic\Assets\Asset;
-    $asset->container($assetContainer);
-    $asset->path($filename);
-
-    return $asset;
-}
-
 /*
 |--------------------------------------------------------------------------
 | Custom Expectations

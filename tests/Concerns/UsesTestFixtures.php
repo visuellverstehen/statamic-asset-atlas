@@ -4,11 +4,9 @@ namespace Tests\Concerns;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Statamic\Facades\AssetContainer;
 use Statamic\Facades\Blueprint;
 use Statamic\Facades\Collection;
-use Statamic\Facades\Entry;
 use Symfony\Component\Yaml\Yaml;
 
 trait UsesTestFixtures
@@ -22,7 +20,7 @@ trait UsesTestFixtures
 
     protected function loadCollections(): void
     {
-        foreach (File::files(__DIR__ . '/../fixtures/collections') as $file) {
+        foreach (File::files(__DIR__.'/../fixtures/collections') as $file) {
             $data = Yaml::parseFile($file->getPathname());
             $collection = Collection::make();
 
@@ -39,7 +37,7 @@ trait UsesTestFixtures
 
     protected function loadBlueprints(): void
     {
-        foreach (File::directories(__DIR__ . '/../fixtures/blueprints/collections') as $collectionDir) {
+        foreach (File::directories(__DIR__.'/../fixtures/blueprints/collections') as $collectionDir) {
             $collectionHandle = basename($collectionDir);
 
             foreach (File::files($collectionDir) as $file) {
@@ -47,7 +45,7 @@ trait UsesTestFixtures
                 $blueprintHandle = $file->getFilenameWithoutExtension();
 
                 Blueprint::make($blueprintHandle)
-                    ->setNamespace('collections.' . $collectionHandle)
+                    ->setNamespace('collections.'.$collectionHandle)
                     ->setContents($data)
                     ->save();
             }
@@ -58,7 +56,7 @@ trait UsesTestFixtures
     {
         Storage::fake('test_disk');
 
-        foreach (File::files(__DIR__ . '/../fixtures/asset-containers') as $file) {
+        foreach (File::files(__DIR__.'/../fixtures/asset-containers') as $file) {
             $data = Yaml::parseFile($file->getPathname());
             $container = AssetContainer::make();
 
@@ -73,6 +71,4 @@ trait UsesTestFixtures
             $container->save();
         }
     }
-
-
 }
