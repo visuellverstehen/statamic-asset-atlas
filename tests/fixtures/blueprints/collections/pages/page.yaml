@@ -1,0 +1,119 @@
+title: Page
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+          -
+            handle: assets_field
+            field:
+              container: assets
+              type: assets
+              display: 'Assets Field'
+          -
+            handle: content
+            field:
+              type: markdown
+              display: 'Markdown Content'
+              localizable: true
+          -
+            handle: bard_field
+            field:
+              buttons:
+                - anchor
+                - image
+              remove_empty_nodes: false
+              container: assets
+              type: bard
+              display: 'Bard Field'
+          -
+            handle: bard_field_with_html
+            field:
+              buttons:
+                - anchor
+                - image
+              save_html: true
+              remove_empty_nodes: false
+              container: assets
+              type: bard
+              display: 'Bard Field with HTML'
+          -
+            handle: link_field
+            field:
+              type: link
+              display: 'Link Field'
+              container: assets
+          -
+            handle: replicator_field
+            field:
+              type: replicator
+              display: 'Replicator Field'
+              sets:
+                new_set_group:
+                  display: 'New Set Group'
+                  sets:
+                    new_set:
+                      display: 'New Set'
+                      fields:
+                        -
+                          handle: assets_field
+                          field:
+                            container: assets
+                            type: assets
+                            display: 'Assets Field'
+                        -
+                          handle: markdown_field
+                          field:
+                            type: markdown
+                            display: 'Markdown Field'
+                            localizable: true
+                        -
+                          handle: bard_field
+                          field:
+                            buttons:
+                              - anchor
+                              - image
+                            remove_empty_nodes: false
+                            container: assets
+                            type: bard
+                            display: 'Bard Field'
+                        -
+                          handle: link_field
+                          field:
+                            type: link
+                            display: 'Link Field'
+                            container: assets
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'
+          -
+            handle: parent
+            field:
+              type: entries
+              collections:
+                - pages
+              max_items: 1
+              listable: false
+              localizable: true
+          -
+            handle: template
+            field:
+              type: template
+              display: Template
+              localizable: true
