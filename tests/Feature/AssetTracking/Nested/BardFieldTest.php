@@ -1,7 +1,7 @@
 <?php
 
 it('tracks replicator nested bard field asset references', function () {
-    $asset = $this->createTestAsset('test-replicator-bard.jpg');
+    $asset = $this->createAsset('test-replicator-bard.jpg');
     $asset->save();
 
     $bardContent = [

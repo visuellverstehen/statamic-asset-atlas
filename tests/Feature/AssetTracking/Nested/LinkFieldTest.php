@@ -1,7 +1,7 @@
 <?php
 
 it('tracks replicator nested link field asset references', function () {
-    $asset = $this->createTestAsset('test-replicator-link.jpg');
+    $asset = $this->createAsset('test-replicator-link.jpg');
     $asset->save();
 
     $linkData = 'asset::assets::'.$asset->path();

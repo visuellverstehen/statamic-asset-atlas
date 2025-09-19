@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\DB;
 
 it('tracks multiple assets in single assets field', function () {
-    $asset1 = $this->createTestAsset('test-multiple-1.jpg');
-    $asset2 = $this->createTestAsset('test-multiple-2.jpg');
+    $asset1 = $this->createAsset('test-multiple-1.jpg');
+    $asset2 = $this->createAsset('test-multiple-2.jpg');
     $asset1->save();
     $asset2->save();
 
