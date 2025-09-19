@@ -29,11 +29,12 @@ function createEntryWithTopLevelAsset($fieldName, $fieldData) {
 /**
  * Create an entry with nested asset data in replicator
  */
-function createEntryWithNestedAsset($setType, $setData) {
+function createEntryWithNestedAsset($fieldName, $fieldData) {
     $replicatorData = [
         [
-            'type' => $setType,
-            'attrs' => $setData,
+            'id' => uniqid(),
+            $fieldName => $fieldData,
+            'type' => 'new_set',
             'enabled' => true,
         ]
     ];
@@ -125,21 +126,66 @@ it('tracks top-level link field asset references', function () {
     expect($entry)->toBeTrackedFor($asset);
 });
 
+it('tracks top-level markdown field asset references', function () {
+    $asset = createTestAsset('test-markdown-field.jpg');
+    $asset->save();
+
+    $markdownContent = "Here is some text with an image:\n\n![](statamic://asset::assets::" . $asset->path() . ")\n\nAnd some more text.";
+
+    $entry = createEntryWithTopLevelAsset('content', $markdownContent);
+    $entry->save();
+
+    expect($entry)->toBeTrackedFor($asset);
+});
+
 // Tests for Nested Asset Fields (in Replicator)
 
-// TODO: Fix replicator field scanning - currently not working
-// The scanner doesn't seem to properly handle nested replicator fields
-// This needs to be investigated separately
 it('tracks replicator nested assets field references', function () {
-    $this->markTestSkipped('Replicator field scanning not working - needs investigation');
+    $asset = createTestAsset('test-replicator-assets.jpg');
+    $asset->save();
+
+    $entry = createEntryWithNestedAsset('assets_field', [$asset->path()]);
+    $entry->save();
+
+    expect($entry)->toBeTrackedFor($asset);
 });
 
 it('tracks replicator nested bard field asset references', function () {
-    $this->markTestSkipped('Replicator field scanning not working - needs investigation');
+    $asset = createTestAsset('test-replicator-bard.jpg');
+    $asset->save();
+
+    $bardContent = [
+        [
+            'type' => 'paragraph',
+            'content' => [
+                ['type' => 'text', 'text' => 'Text before image']
+            ]
+        ],
+        [
+            'type' => 'image',
+            'attrs' => [
+                'src' => 'asset::assets::' . $asset->path(),
+                'alt' => null
+            ]
+        ]
+    ];
+
+    $entry = createEntryWithNestedAsset('bard_field', $bardContent);
+    $entry->save();
+
+    expect($entry)->toBeTrackedFor($asset);
 });
 
 it('tracks replicator nested link field asset references', function () {
-    $this->markTestSkipped('Replicator field scanning not working - needs investigation');
+    $asset = createTestAsset('test-replicator-link.jpg');
+    $asset->save();
+
+    $linkData = 'asset::assets::' . $asset->path();
+
+    $entry = createEntryWithNestedAsset('link_field', $linkData);
+    $entry->save();
+
+    expect($entry)->toBeTrackedFor($asset);
 });
 
 // Edge Cases and Multiple References
