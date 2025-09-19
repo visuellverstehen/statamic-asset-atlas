@@ -1,0 +1,52 @@
+id: about-page-id
+blueprint: page
+title: 'About Page'
+slug: about
+assets_field:
+  - 'assets::about-header.jpg'
+  - 'assets::about-team.jpg'
+content: 'About page content describing our company.'
+bard_field:
+  -
+    type: paragraph
+    content:
+      -
+        type: text
+        text: 'Learn about our company and values.'
+  -
+    type: set
+    attrs:
+      values:
+        type: image
+        image: 'assets::about-bard.jpg'
+        caption: 'About us image'
+link_field:
+  url: '/contact'
+  title: 'Contact Us'
+replicator_field:
+  -
+    type: new_set
+    assets_field:
+      - 'assets::about-value1.jpg'
+    markdown_field: 'Our first core value'
+    bard_field:
+      -
+        type: paragraph
+        content:
+          -
+            type: text
+            text: 'Integrity drives everything we do'
+  -
+    type: new_set
+    assets_field:
+      - 'assets::about-value2.jpg'
+    markdown_field: 'Our second core value'
+    bard_field:
+      -
+        type: paragraph
+        content:
+          -
+            type: text
+            text: 'Quality is never compromised'
+template: page
+published: true

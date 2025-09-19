@@ -1,0 +1,9 @@
+title: Assets
+handle: assets
+disk: test_disk
+allow_uploads: true
+allow_downloading: true
+allow_renaming: true
+allow_moving: true
+create_folders: true
+search_index: false
