@@ -9,33 +9,9 @@ it('tracks top-level assets field references', function () {
 
     expect($entry)->toBeTrackedFor($asset);
 
-    $asset2 = $this->createAsset('test-assets-field-2.jpg');
-    $asset2->save();
-
-    $entry->set('assets_field', [$asset->path(), $asset2->path()]);
-    $entry->save();
-
-    expect($entry)->toBeTrackedFor($asset);
-    expect($entry)->toBeTrackedFor($asset2);
-
-    $asset->delete();
-
-    expect($entry)->not->toBeTrackedFor($asset);
-    expect($entry)->toBeTrackedFor($asset2);
-
-    $entry->delete();
-
-    expect($entry)->not->toBeTrackedFor($asset2);
-});
-
-it('updates references when replacing data', function () {
-    $asset = $this->createAsset('test-assets-field.jpg');
-    $asset->save();
-
-    $entry = $this->createEntryWithTopLevelAsset('assets_field', [$asset->path()]);
-    $entry->save();
-
-    expect($entry)->toBeTrackedFor($asset);
+    // test replacing the value
+    // (cloning the entry fixes an issue with the stache in tests)
+    $entry = clone $entry;
 
     $asset2 = $this->createAsset('test-assets-field-2.jpg');
     $asset2->save();
@@ -45,4 +21,24 @@ it('updates references when replacing data', function () {
 
     expect($entry)->not->toBeTrackedFor($asset);
     expect($entry)->toBeTrackedFor($asset2);
-})->skip();
+
+    // test with multiple values
+    $entry = clone $entry;
+
+    $entry->set('assets_field', [$asset->path(), $asset2->path()]);
+    $entry->save();
+
+    expect($entry)->toBeTrackedFor($asset);
+    expect($entry)->toBeTrackedFor($asset2);
+
+    // test deleting the asset
+    $asset->delete();
+
+    expect($entry)->not->toBeTrackedFor($asset);
+    expect($entry)->toBeTrackedFor($asset2);
+
+    // test deleting the entry
+    $entry->delete();
+
+    expect($entry)->not->toBeTrackedFor($asset2);
+});
