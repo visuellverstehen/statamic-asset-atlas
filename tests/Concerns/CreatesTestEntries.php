@@ -20,11 +20,15 @@ trait CreatesTestEntries
             $fieldName => $fieldData,
         ];
 
-        return EntryFacade::make()
+        $entry = EntryFacade::make()
             ->collection('pages')
             ->blueprint('page')
             ->slug('test-page-'.$fieldName.'-'.time())
             ->data($data);
+
+        $entry->save();
+
+        return $entry;
     }
 
     /**
@@ -41,7 +45,7 @@ trait CreatesTestEntries
             ],
         ];
 
-        return EntryFacade::make()
+        $entry = EntryFacade::make()
             ->collection('pages')
             ->blueprint('page')
             ->slug('test-page-replicator-'.time())
@@ -49,6 +53,10 @@ trait CreatesTestEntries
                 'title' => 'Test Page with Nested Asset',
                 'replicator_field' => $replicatorData,
             ]);
+
+        $entry->save();
+
+        return $entry;
     }
 
     /**
@@ -62,6 +70,7 @@ trait CreatesTestEntries
         $asset = new Asset;
         $asset->container($assetContainer);
         $asset->path($filename);
+        $asset->save();
 
         return $asset;
     }

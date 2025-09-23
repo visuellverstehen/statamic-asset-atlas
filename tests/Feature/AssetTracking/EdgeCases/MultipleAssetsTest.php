@@ -5,11 +5,8 @@ use Illuminate\Support\Facades\DB;
 it('tracks multiple assets in single assets field', function () {
     $asset1 = $this->createAsset('test-multiple-1.jpg');
     $asset2 = $this->createAsset('test-multiple-2.jpg');
-    $asset1->save();
-    $asset2->save();
 
     $entry = $this->createEntryWithTopLevelAsset('assets_field', [$asset1->path(), $asset2->path()]);
-    $entry->save();
 
     expect($entry)->toBeTrackedFor($asset1, 1);
     expect($entry)->toBeTrackedFor($asset2, 1);

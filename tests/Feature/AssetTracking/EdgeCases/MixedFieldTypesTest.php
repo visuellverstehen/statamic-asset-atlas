@@ -6,8 +6,6 @@ use Statamic\Facades\Entry;
 it('tracks assets in mixed field types within same entry', function () {
     $assetForAssetsField = $this->createAsset('test-mixed-assets.jpg');
     $assetForBardField = $this->createAsset('test-mixed-bard.jpg');
-    $assetForAssetsField->save();
-    $assetForBardField->save();
 
     $bardContent = [
         [

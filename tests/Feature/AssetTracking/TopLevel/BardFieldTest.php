@@ -2,7 +2,6 @@
 
 it('tracks top-level bard field asset references', function () {
     $asset = $this->createAsset('test-bard-field.jpg');
-    $asset->save();
 
     $bardContent = [
         [
@@ -21,12 +20,10 @@ it('tracks top-level bard field asset references', function () {
     ];
 
     $entry = $this->createEntryWithTopLevelAsset('bard_field', $bardContent);
-    $entry->save();
 
     expect($entry)->toBeTrackedFor($asset);
 
     $asset2 = $this->createAsset('test-bard-field-2.jpg');
-    $asset2->save();
 
     $updatedBardContent = $bardContent;
     $updatedBardContent[] = [
@@ -55,7 +52,6 @@ it('tracks top-level bard field asset references', function () {
 
 it('tracks top-level bard field with HTML asset references', function () {
     $asset = $this->createAsset('test-bard-html-field.jpg');
-    $asset->save();
 
     $bardContent = [
         [
@@ -74,12 +70,10 @@ it('tracks top-level bard field with HTML asset references', function () {
     ];
 
     $entry = $this->createEntryWithTopLevelAsset('bard_field_with_html', $bardContent);
-    $entry->save();
 
     expect($entry)->toBeTrackedFor($asset);
 
     $asset2 = $this->createAsset('test-bard-html-field-2.jpg');
-    $asset2->save();
 
     $updatedBardContent = $bardContent;
     $updatedBardContent[] = [

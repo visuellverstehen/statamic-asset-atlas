@@ -2,7 +2,6 @@
 
 it('tracks replicator nested bard field asset references', function () {
     $asset = $this->createAsset('test-replicator-bard.jpg');
-    $asset->save();
 
     $bardContent = [
         [
@@ -21,7 +20,6 @@ it('tracks replicator nested bard field asset references', function () {
     ];
 
     $entry = $this->createEntryWithNestedAsset('bard_field', $bardContent);
-    $entry->save();
 
     expect($entry)->toBeTrackedFor($asset);
 });
