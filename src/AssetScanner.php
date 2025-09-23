@@ -55,13 +55,13 @@ class AssetScanner extends DataReferenceUpdater
 
         // If activated, check the items original data
         // to ensure to remove unused references.
-        if ($this->checkOriginal) {
+        if ($this->checkOriginal && ! empty(($original = $this->getOriginal()))) {
             $fromData = $this->atlasItems;
-            $this->findReferences($this->getOriginal());
+            $this->findReferences($original);
 
             $this->atlasItems
                 ->unique()
-                ->diffKeys($fromData)
+                ->diff($fromData)
                 ->each(function ($item) use ($itemId) {
                     [$container, $path] = explode('::', $item);
 

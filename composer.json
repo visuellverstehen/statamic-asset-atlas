@@ -9,6 +9,11 @@
             "VV\\AssetAtlas\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "visuellverstehen"
@@ -35,11 +40,17 @@
     },
     "require-dev": {
         "spatie/laravel-ray": "^1.40",
-        "laravel/pint": "^1.25"
+        "laravel/pint": "^1.25",
+        "pestphp/pest": "^4.1",
+        "orchestra/testbench": "^10.0"
     },
     "config": {
         "allow-plugins": {
-            "pixelfear/composer-dist-plugin": true
+            "pixelfear/composer-dist-plugin": true,
+            "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "test": "./vendor/bin/pest --ci --parallel"
     }
 }
