@@ -8,7 +8,7 @@ it('excludes references to non-existent items', function (string $itemType, stri
     $assetPath = 'foo/bar/foobar.jpg';
     $assetContainer = 'assets';
 
-    $itemId = match($itemType) {
+    $itemId = match ($itemType) {
         'entry' => Uuid::uuid4()->toString(),
         'term' => 'test_taxonomy::test_term',
         'global_var' => 'test_globalvar',
