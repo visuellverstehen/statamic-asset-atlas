@@ -38,8 +38,12 @@ it('excludes references to non-existent items when checking dedicated item types
 
     expect($exists)->toBeTrue();
 
-    $trackedItems = AssetAtlas::$method($assetPath, $assetContainer);
+    // Check for specific references without resolving them
+    $references = AssetAtlas::find($assetPath, $assetContainer, $itemType);
+    expect($references)->not()->toBeEmpty();
 
+    // Check for specific references and resolve them, if possible
+    $trackedItems = AssetAtlas::$method($assetPath, $assetContainer);
     expect($trackedItems)->toBeEmpty();
 })->with('item_types');
 
@@ -72,7 +76,11 @@ it('excludes references to non-existent items when checking for unspecified item
         expect($exists)->toBeTrue();
     }
 
-    $trackedItems = AssetAtlas::findAll($assetPath, $assetContainer);
+    // Check for references without resolving them
+    $references = AssetAtlas::find($assetPath, $assetContainer);
+    expect($references)->not()->toBeEmpty();
 
+    // Check for references and resolve them, if possible
+    $trackedItems = AssetAtlas::findAll($assetPath, $assetContainer);
     expect($trackedItems)->toBeEmpty();
 });
