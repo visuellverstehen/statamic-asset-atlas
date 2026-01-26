@@ -15,6 +15,8 @@ return new class extends Migration
             $table->uuid('item_id');
             $table->string('item_type');
             $table->timestamps();
+
+            $table->index(['asset_path', 'asset_container']);
         });
     }
 
