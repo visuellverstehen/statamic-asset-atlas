@@ -32,7 +32,8 @@ class Atlas
 
     public function findAll(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
-        return $this->find($assetPath, $containerHandle)
+        return $this
+            ->find($assetPath, $containerHandle)
             ->map(function ($ref) {
                 return match ($ref->item_type) {
                     'entry' => Entry::find($ref->item_id),
@@ -40,34 +41,40 @@ class Atlas
                     'term' => Term::find($ref->item_id),
                     'user' => User::find($ref->item_id),
                 };
-            });
+            })
+            ->filter();
     }
 
     public function findEntries(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
-        return $this->find($assetPath, $containerHandle, 'entry')
-            ->map(fn ($ref) => Entry::find($ref->item_id));
+        return $this
+            ->find($assetPath, $containerHandle, 'entry')
+            ->map(fn ($ref) => Entry::find($ref->item_id))
+            ->filter();
     }
 
     public function findGlobalVar(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
         return $this
             ->find($assetPath, $containerHandle, 'global_var')
-            ->map(fn ($ref) => GlobalVariables::find($ref->item_id));
+            ->map(fn ($ref) => GlobalVariables::find($ref->item_id))
+            ->filter();
     }
 
     public function findTerms(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
         return $this
             ->find($assetPath, $containerHandle, 'term')
-            ->map(fn ($ref) => Term::find($ref->item_id));
+            ->map(fn ($ref) => Term::find($ref->item_id))
+            ->filter();
     }
 
     public function findUsers(string $assetPath, string $containerHandle): Collection|LazyCollection
     {
         return $this
             ->find($assetPath, $containerHandle, 'user')
-            ->map(fn ($ref) => User::find($ref->item_id));
+            ->map(fn ($ref) => User::find($ref->item_id))
+            ->filter();
     }
 
     public function remove(string $assetPath, string $containerHandle, string $itemId)
