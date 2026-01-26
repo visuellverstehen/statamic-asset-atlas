@@ -4,6 +4,13 @@ use Ramsey\Uuid\Uuid;
 use VV\AssetAtlas\AssetAtlas;
 use VV\AssetAtlas\AssetReference;
 
+dataset('item_types', [
+    'entry' => ['entry', 'findEntries'],
+    'term' => ['term', 'findTerms'],
+    'global_var' => ['global_var', 'findGlobalVar'],
+    'user' => ['user', 'findUsers'],
+]);
+
 it('excludes references to non-existent items', function (string $itemType, string $method) {
     $assetPath = 'foo/bar/foobar.jpg';
     $assetContainer = 'assets';
@@ -34,9 +41,4 @@ it('excludes references to non-existent items', function (string $itemType, stri
     $trackedItems = AssetAtlas::$method($assetPath, $assetContainer);
 
     expect($trackedItems)->toBeEmpty();
-})->with([
-    'entry' => ['entry', 'findEntries'],
-    'term' => ['term', 'findTerms'],
-    'global_var' => ['global_var', 'findGlobalVar'],
-    'user' => ['user', 'findUsers'],
-]);
+})->with('item_types');
