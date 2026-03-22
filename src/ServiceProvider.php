@@ -26,10 +26,16 @@ class ServiceProvider extends AddonServiceProvider
             Scan::class,
         ]);
 
+        $this->mergeConfigFrom(__DIR__.'/../config/asset-atlas.php', 'asset-atlas');
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
+                __DIR__.'/../config/asset-atlas.php' => config_path('asset-atlas.php'),
+            ], 'asset-atlas-config');
+
+            $this->publishes([
                 __DIR__.'/../database/migrations/create_asset_atlas_table.php' => database_path('migrations/'.date('Y_m_d_His').'_create_asset_atlas_table.php'),
-            ], 'asset_atlas_migrations');
+            ], 'asset-atlas-migrations');
         }
     }
 }

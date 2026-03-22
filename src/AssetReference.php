@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class AssetReference extends Model
 {
-    protected $table = 'asset_atlas';
+    protected $table;
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        $this->table = config('asset-atlas.table', 'asset_atlas');
+    }
 
     protected $fillable = [
         'asset_path',
