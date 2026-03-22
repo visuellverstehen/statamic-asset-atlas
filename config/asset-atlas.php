@@ -15,15 +15,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Lazy Collection Threshold
+    | Lazy Collections
     |--------------------------------------------------------------------------
     |
-    | When the number of asset references exceeds this threshold, queries will
-    | return a lazy collection to avoid loading all records into memory at once.
+    | When enabled, query methods like find(), findAll(), findEntries(), etc.
+    | will return LazyCollections instead of regular Collections. This avoids
+    | loading all records into memory at once, which can be useful for sites
+    | with a very large number of asset references.
     |
     */
 
-    'lazy_threshold' => 500,
+    'lazy' => false,
 
     /*
     |--------------------------------------------------------------------------

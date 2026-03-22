@@ -11,13 +11,13 @@ use Statamic\Facades\User;
 
 class Atlas
 {
-    protected int $lazyThreshold;
+    protected bool $lazy;
 
     protected array $itemTypes;
 
     public function __construct()
     {
-        $this->lazyThreshold = config('asset-atlas.lazy_threshold', 500);
+        $this->lazy = config('asset-atlas.lazy', false);
         $this->itemTypes = config('asset-atlas.item_types', ['entry', 'term', 'global_var', 'user']);
     }
 
@@ -31,9 +31,7 @@ class Atlas
             $query->where('item_type', $itemType);
         }
 
-        return ($query->count() > $this->lazyThreshold)
-            ? $query->lazy()
-            : $query->get();
+        return $this->lazy ? $query->lazy() : $query->get();
     }
 
     public function findAll(string $assetPath, string $containerHandle): Collection|LazyCollection
