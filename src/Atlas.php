@@ -131,11 +131,9 @@ class Atlas
             return;
         }
 
-        $refs = $this->find($oldPath, $container);
-
-        $refs->each(function ($ref) use ($newPath) {
-            $ref->asset_path = $newPath;
-            $ref->save();
-        });
+        AssetReference::query()
+            ->where('asset_path', $oldPath)
+            ->where('asset_container', $container)
+            ->update(['asset_path' => $newPath]);
     }
 }
