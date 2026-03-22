@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('asset_atlas', function (Blueprint $table) {
+        Schema::create(config('asset-atlas.table', 'asset_atlas'), function (Blueprint $table) {
             $table->id();
             $table->string('asset_path');
             $table->string('asset_container');
@@ -16,12 +16,18 @@ return new class extends Migration
             $table->string('item_type');
             $table->timestamps();
 
-            $table->index(['asset_path', 'asset_container']);
+            $table->unique(['asset_path', 'asset_container', 'item_id']);
+
+            if (config('asset-atlas.database_indices', true)) {
+                $table->index('item_id');
+                $table->index('item_type');
+                $table->index(['item_id', 'item_type']);
+            }
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('asset_atlas');
+        Schema::dropIfExists(config('asset-atlas.table', 'asset_atlas'));
     }
 };
