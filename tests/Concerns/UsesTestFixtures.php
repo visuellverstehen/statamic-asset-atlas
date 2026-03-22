@@ -63,11 +63,6 @@ trait UsesTestFixtures
             $container->handle($file->getFilenameWithoutExtension());
             $container->title($data['title']);
             $container->disk($data['disk']);
-            $container->allowUploads($data['allow_uploads']);
-            $container->allowDownloading($data['allow_downloading']);
-            $container->allowRenaming($data['allow_renaming']);
-            $container->allowMoving($data['allow_moving']);
-            $container->createFolders($data['create_folders']);
             $container->save();
         }
     }
