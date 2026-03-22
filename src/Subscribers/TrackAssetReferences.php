@@ -15,6 +15,7 @@ use Statamic\Events\TermSaving;
 use Statamic\Events\UserDeleted;
 use Statamic\Events\UserSaved;
 use Statamic\Events\UserSaving;
+use Illuminate\Support\Facades\DB;
 use Statamic\Facades\Blink;
 use Statamic\Facades\Entry;
 use Statamic\Facades\GlobalVariables;
@@ -70,7 +71,7 @@ class TrackAssetReferences extends Subscriber
             $scanner->setOriginal($original)->checkOriginal();
         }
 
-        $scanner->addReferences();
+        DB::transaction(fn () => $scanner->addReferences());
     }
 
     public function handleGlobalVarsSaving(GlobalVariablesSaving $event)
@@ -137,7 +138,7 @@ class TrackAssetReferences extends Subscriber
             Blink::forget($prefix.$item->id());
         }
 
-        $scanner->addReferences();
+        DB::transaction(fn () => $scanner->addReferences());
     }
 
     protected function removeReferences($item)
