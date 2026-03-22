@@ -60,7 +60,7 @@ return [
     'table' => 'asset_atlas',
 
     // Use lazy collections for large sites
-    'lazy' => false,
+    'lazy_collections' => false,
 
     // Item types to track: entry, term, global_var, user
     'item_types' => ['entry', 'term', 'global_var', 'user'],
@@ -75,10 +75,10 @@ return [
 
 ### Lazy Collections
 
-For sites with many asset references, enable `lazy` mode to avoid loading all records into memory:
+For sites with many asset references, enable `lazy_collections` to avoid loading all records into memory:
 
 ```php
-'lazy' => true,
+'lazy_collections' => true,
 ```
 
 This makes `find()`, `findAll()`, and similar methods return `LazyCollection` instead of `Collection`.
