@@ -52,6 +52,24 @@ tabs:
               display: 'Link Field'
               container: assets
           -
+            handle: grid_field
+            field:
+              type: grid
+              display: 'Grid Field'
+              fields:
+                -
+                  handle: grid_assets
+                  field:
+                    container: assets
+                    type: assets
+                    display: 'Grid Assets'
+                -
+                  handle: grid_link
+                  field:
+                    type: link
+                    display: 'Grid Link'
+                    container: assets
+          -
             handle: replicator_field
             field:
               type: replicator
@@ -91,6 +109,18 @@ tabs:
                             type: link
                             display: 'Link Field'
                             container: assets
+                        -
+                          handle: nested_grid
+                          field:
+                            type: grid
+                            display: 'Nested Grid'
+                            fields:
+                              -
+                                handle: grid_assets
+                                field:
+                                  container: assets
+                                  type: assets
+                                  display: 'Grid Assets'
   sidebar:
     display: Sidebar
     sections:
