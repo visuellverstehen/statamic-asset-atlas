@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use VV\AssetAtlas\AssetAtlas;
 use VV\AssetAtlas\AssetReference;
@@ -29,7 +30,7 @@ it('excludes references to non-existent items when checking dedicated item types
         'item_type' => $itemType,
     ]);
 
-    $exists = \Illuminate\Support\Facades\DB::table('asset_atlas')
+    $exists = DB::table('asset_atlas')
         ->where('asset_path', $assetPath)
         ->where('asset_container', $assetContainer)
         ->where('item_type', $itemType)
@@ -66,7 +67,7 @@ it('excludes references to non-existent items when checking for unspecified item
             'item_type' => $itemType,
         ]);
 
-        $exists = \Illuminate\Support\Facades\DB::table('asset_atlas')
+        $exists = DB::table('asset_atlas')
             ->where('asset_path', $assetPath)
             ->where('asset_container', $assetContainer)
             ->where('item_type', $itemType)

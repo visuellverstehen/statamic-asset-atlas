@@ -2,10 +2,9 @@
 
 namespace Tests\Feature\AssetTracking\CustomFieldtype;
 
-use Statamic\Facades\Blueprint;
 use Statamic\Facades\Blink;
+use Statamic\Facades\Blueprint;
 use Tests\Support\TestCustomAssetsFieldtype;
-use Tests\TestCase;
 
 beforeEach(function () {
     Blink::flush();

@@ -2,6 +2,8 @@
 
 namespace VV\AssetAtlas\Contracts;
 
+use Statamic\Fieldtypes\UpdatesReferences;
+
 /**
  * Interface for fieldtypes that can scan their data for asset references.
  *
@@ -13,7 +15,7 @@ namespace VV\AssetAtlas\Contracts;
  * work for Statamic's reference updates, but AssetAtlas won't be able to
  * track their asset references during scans.
  *
- * @see \Statamic\Fieldtypes\UpdatesReferences
+ * @see UpdatesReferences
  */
 interface ScansAssetReferences
 {
@@ -29,7 +31,7 @@ interface ScansAssetReferences
      * For fieldtypes that embed container in data:
      *   return [['container' => $extractedContainer, 'path' => $extractedPath], ...]
      *
-     * @param mixed $data The field's stored data
+     * @param  mixed  $data  The field's stored data
      * @return array Array of ['container' => string, 'path' => string] references
      */
     public function scanAssetReferences($data): array;

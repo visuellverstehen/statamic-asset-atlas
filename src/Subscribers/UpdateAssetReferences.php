@@ -2,6 +2,8 @@
 
 namespace VV\AssetAtlas\Subscribers;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 use Statamic\Events\AssetDeleted;
 use Statamic\Events\AssetReplaced;
 use Statamic\Events\AssetSaved;
@@ -17,7 +19,7 @@ class UpdateAssetReferences extends BaseListener
      * Try to use AssetAtlas, if required data is available
      * or pass on to original function, fetching everything.
      *
-     * @return \Illuminate\Support\Collection|\Illuminate\Support\LazyCollection
+     * @return Collection|LazyCollection
      */
     public function getItemsContainingData()
     {

@@ -7,7 +7,6 @@ use Statamic\Assets\Asset;
 use Statamic\Entries\Entry;
 use Statamic\Facades\AssetContainer;
 use Statamic\Facades\Entry as EntryFacade;
-use Statamic\Facades\Blueprint;
 
 trait CreatesTestEntries
 {
@@ -35,7 +34,7 @@ trait CreatesTestEntries
     /**
      * Create an entry with nested asset data in replicator
      */
-    protected function createEntryWithNestedAsset(string $fieldName, mixed $fieldData): \Statamic\Entries\Entry
+    protected function createEntryWithNestedAsset(string $fieldName, mixed $fieldData): Entry
     {
         $replicatorData = [
             [
