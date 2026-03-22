@@ -6,10 +6,16 @@ use Illuminate\Support\Arr;
 use Statamic\Data\DataReferenceUpdater;
 use Statamic\Facades\AssetContainer;
 use VV\AssetAtlas\Concerns\GetsItemType;
+use VV\AssetAtlas\Contracts\ScansAssetReferences;
 
 class AssetScanner extends DataReferenceUpdater
 {
     use GetsItemType;
+
+    /**
+     * Built-in leaf fieldtype handles that have dedicated scanning methods.
+     */
+    private const BUILTIN_LEAF_FIELDTYPES = ['assets', 'link', 'bard', 'markdown'];
 
     protected $checkOriginal = false;
 
@@ -102,13 +108,16 @@ class AssetScanner extends DataReferenceUpdater
 
     protected function recursivelyUpdateFields($fields, $dottedPrefix = null)
     {
-        // Using this function to scan all items for asset references
+        // Using this function to scan all items for asset references.
+        // Order matters: built-in leaf types first, then custom fieldtypes,
+        // then nested container types for recursion.
 
         $this
             ->scanAssetsFieldValues($fields, $dottedPrefix)
             ->scanLinkFieldValues($fields, $dottedPrefix)
             ->scanBardFieldValues($fields, $dottedPrefix)
             ->scanMarkdownFieldValues($fields, $dottedPrefix)
+            ->scanCustomFieldtypeValues($fields, $dottedPrefix)
             ->updateNestedFieldValues($fields, $dottedPrefix);
     }
 
@@ -257,6 +266,41 @@ class AssetScanner extends DataReferenceUpdater
 
                 if ($value = Arr::get($this->dataToScan, $dottedKey)) {
                     $this->findAssetsInStringValue($value);
+                }
+            });
+
+        return $this;
+    }
+
+    /**
+     * Scan custom fieldtypes that implement ScansAssetReferences.
+     *
+     * This enables third-party fieldtypes to participate in AssetAtlas scanning
+     * by implementing the ScansAssetReferences interface, returning extracted
+     * asset references from their data.
+     */
+    private function scanCustomFieldtypeValues($fields, $dottedPrefix)
+    {
+        $this->fieldsWithReferenceUpdates($fields)
+            ->reject(fn ($field) => in_array($field->type(), self::BUILTIN_LEAF_FIELDTYPES))
+            ->each(function ($field) use ($dottedPrefix) {
+                $fieldtype = $field->fieldtype();
+
+                if (! $fieldtype instanceof ScansAssetReferences) {
+                    return;
+                }
+
+                $dottedKey = $dottedPrefix.$field->handle();
+                $data = Arr::get($this->dataToScan, $dottedKey);
+
+                if ($data === null) {
+                    return;
+                }
+
+                $references = $fieldtype->scanAssetReferences($data);
+
+                foreach ($references as $ref) {
+                    $this->push($ref['container'], $ref['path']);
                 }
             });
 

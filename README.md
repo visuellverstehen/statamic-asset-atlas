@@ -38,6 +38,132 @@ php please asset-atlas:scan --reset
 php please asset-atlas:scan --reset --force
 ```
 
+## Support for Custom Fieldtypes
+
+If you're developing a custom fieldtype that stores asset references, you can make it compatible with AssetAtlas by implementing the `ScansAssetReferences` interface.
+
+### Prerequisites
+
+Your fieldtype should already use Statamic's `UpdatesReferences` trait to participate in the reference update system. This enables Statamic to update references when assets are renamed or moved.
+
+```php
+use Statamic\Fieldtypes\UpdatesReferences;
+
+class MyCustomFieldtype extends Fieldtype
+{
+    use UpdatesReferences;
+    
+    public function replaceAssetReferences($data, ?string $newValue, string $oldValue, string $container)
+    {
+        // Update asset references in your fieldtype's data format
+        // Return the modified data
+    }
+}
+```
+
+### Adding Atlas Scanning Support
+
+To enable AssetAtlas to discover and track asset references in your fieldtype, implement the `ScansAssetReferences` interface:
+
+```php
+use Statamic\Fieldtypes\UpdatesReferences;
+use VV\AssetAtlas\Contracts\ScansAssetReferences;
+
+class MyCustomFieldtype extends Fieldtype implements ScansAssetReferences
+{
+    use UpdatesReferences;
+    
+    /**
+     * Implementation for Statamic's reference updates.
+     */
+    public function replaceAssetReferences($data, ?string $newValue, string $oldValue, string $container)
+    {
+        // Handle asset renames/moves
+        // ...
+    }
+    
+    /**
+     * Implementation for AssetAtlas scanning.
+     * 
+     * @param mixed $data The field's stored data
+     * @return array Array of ['container' => string, 'path' => string] references
+     */
+    public function scanAssetReferences($data): array
+    {
+        $container = $this->config('container');
+        $references = [];
+        
+        // Extract asset references from your fieldtype's data format
+        // Example: if your data is ['asset' => 'path/to/file.jpg']
+        if (isset($data['asset'])) {
+            $references[] = [
+                'container' => $container,
+                'path' => $data['asset'],
+            ];
+        }
+        
+        return $references;
+    }
+}
+```
+
+### Return Format
+
+The `scanAssetReferences` method must return an array of associative arrays, each containing:
+
+- `container`: The asset container handle (typically from `$this->config('container')`)
+- `path`: The asset path relative to the container
+
+### Example: Gallery Fieldtype
+
+Here's a more complete example for a fieldtype that stores multiple assets with captions:
+
+```php
+use Statamic\Fieldtypes\UpdatesReferences;
+use VV\AssetAtlas\Contracts\ScansAssetReferences;
+
+class GalleryFieldtype extends Fieldtype implements ScansAssetReferences
+{
+    use UpdatesReferences;
+    
+    protected static $handle = 'gallery';
+    
+    public function replaceAssetReferences($data, ?string $newValue, string $oldValue, string $container)
+    {
+        if (!is_array($data)) {
+            return $data;
+        }
+        
+        return collect($data)->map(function ($item) use ($newValue, $oldValue, $container) {
+            if (($item['container'] ?? null) === $container && $item['path'] === $oldValue) {
+                if ($newValue === null) {
+                    return null; // Asset was deleted
+                }
+                $item['path'] = $newValue;
+            }
+            return $item;
+        })->filter()->values()->all();
+    }
+    
+    public function scanAssetReferences($data): array
+    {
+        if (!is_array($data)) {
+            return [];
+        }
+        
+        $container = $this->config('container');
+        
+        return collect($data)
+            ->filter(fn ($item) => isset($item['path']))
+            ->map(fn ($item) => [
+                'container' => $item['container'] ?? $container,
+                'path' => $item['path'],
+            ])
+            ->all();
+    }
+}
+```
+
 ## More about us
 
 At **visuellverstehen** we create innovative digital and design solutions with a special focus on the common good. With technical expertise, high creativity and strategic skills, we develop products with a personal character.
