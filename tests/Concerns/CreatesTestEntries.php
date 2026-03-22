@@ -7,6 +7,7 @@ use Statamic\Assets\Asset;
 use Statamic\Entries\Entry;
 use Statamic\Facades\AssetContainer;
 use Statamic\Facades\Entry as EntryFacade;
+use Statamic\Facades\Blueprint;
 
 trait CreatesTestEntries
 {
@@ -53,6 +54,27 @@ trait CreatesTestEntries
                 'title' => 'Test Page with Nested Asset',
                 'replicator_field' => $replicatorData,
             ]);
+
+        $entry->save();
+
+        return $entry;
+    }
+
+    /**
+     * Create an entry with custom field data
+     */
+    protected function createEntryWithCustomField(string $fieldName, mixed $fieldData, string $blueprint = 'page'): Entry
+    {
+        $data = [
+            'title' => 'Test Page with Custom Field',
+            $fieldName => $fieldData,
+        ];
+
+        $entry = EntryFacade::make()
+            ->collection('pages')
+            ->blueprint($blueprint)
+            ->slug('test-page-custom-'.time())
+            ->data($data);
 
         $entry->save();
 
