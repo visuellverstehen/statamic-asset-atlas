@@ -11,13 +11,12 @@ trait GetsItemType
 {
     public function getItemType($item): ?string
     {
-        switch (true) {
-            case $item instanceof Entry: return 'entry';
-            case $item instanceof Term: return 'term';
-            case $item instanceof Variables: return 'global_var';
-            case $item instanceof User: return 'user';
-        }
-
-        return null;
+        return match (true) {
+            $item instanceof Entry => 'entry',
+            $item instanceof Term => 'term',
+            $item instanceof Variables => 'global_var',
+            $item instanceof User => 'user',
+            default => null,
+        };
     }
 }
