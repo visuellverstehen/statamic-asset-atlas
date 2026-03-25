@@ -20,4 +20,14 @@ trait GetsItemType
 
         return null;
     }
+
+    public function getItemContext($item): ?string
+    {
+        return match (true) {
+            $item instanceof Entry => $item->collectionHandle(),
+            $item instanceof Term => $item->taxonomyHandle(),
+            $item instanceof Variables => $item->handle(),
+            default => null,
+        };
+    }
 }

@@ -15,10 +15,15 @@ use Statamic\Events\UserDeleted;
 use Statamic\Events\UserSaved;
 use Statamic\Facades\Blink;
 use Statamic\Facades\GlobalVariables;
+use Throwable;
 use VV\AssetAtlas\AssetScanner;
+use VV\AssetAtlas\Concerns\GetsItemType;
+use VV\AssetAtlas\Events\AssetAtlasTransactionFailed;
 
 class TrackAssetReferences extends Subscriber
 {
+    use GetsItemType;
+
     protected $listeners = [
         EntryDeleted::class => 'handleEntryDeleted',
         EntrySaved::class => 'handleEntrySaved',
@@ -62,7 +67,7 @@ class TrackAssetReferences extends Subscriber
                 ->checkOriginal();
         }
 
-        $this->transaction(fn () => $scanner->addReferences());
+        $this->transaction(fn () => $scanner->addReferences(), $event->variables);
     }
 
     public function handleGlobalVarsSaving(GlobalVariablesSaving $event)
@@ -99,15 +104,21 @@ class TrackAssetReferences extends Subscriber
     {
         $this->transaction(fn () => AssetScanner::item($item)
             ->checkOriginal()
-            ->addReferences());
+            ->addReferences(), $item);
     }
 
-    protected function transaction(callable $callback): void
+    protected function transaction(callable $callback, $item): void
     {
         try {
             DB::transaction($callback);
-        } catch (\Throwable $e) {
-            report($e);
+        } catch (Throwable $e) {
+            event(new AssetAtlasTransactionFailed(
+                itemId: $item->id(),
+                itemType: $this->getItemType($item),
+                itemContext: $this->getItemContext($item),
+                exception: $e,
+            ));
+
             throw $e;
         }
     }
