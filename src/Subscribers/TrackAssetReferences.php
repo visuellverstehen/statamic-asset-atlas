@@ -62,7 +62,7 @@ class TrackAssetReferences extends Subscriber
                 ->checkOriginal();
         }
 
-        DB::transaction(fn () => $scanner->addReferences());
+        $this->transaction(fn () => $scanner->addReferences());
     }
 
     public function handleGlobalVarsSaving(GlobalVariablesSaving $event)
@@ -97,9 +97,19 @@ class TrackAssetReferences extends Subscriber
 
     protected function addReferences($item)
     {
-        DB::transaction(fn () => AssetScanner::item($item)
+        $this->transaction(fn () => AssetScanner::item($item)
             ->checkOriginal()
             ->addReferences());
+    }
+
+    protected function transaction(callable $callback): void
+    {
+        try {
+            DB::transaction($callback);
+        } catch (\Throwable $e) {
+            report($e);
+            throw $e;
+        }
     }
 
     protected function removeReferences($item)
