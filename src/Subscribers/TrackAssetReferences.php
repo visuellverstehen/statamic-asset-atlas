@@ -12,6 +12,7 @@ use Statamic\Events\TermDeleted;
 use Statamic\Events\TermSaved;
 use Statamic\Events\UserDeleted;
 use Statamic\Events\UserSaved;
+use Illuminate\Support\Facades\DB;
 use Statamic\Facades\Blink;
 use Statamic\Facades\GlobalVariables;
 use VV\AssetAtlas\AssetScanner;
@@ -61,7 +62,7 @@ class TrackAssetReferences extends Subscriber
                 ->checkOriginal();
         }
 
-        $scanner->addReferences();
+        DB::transaction(fn () => $scanner->addReferences());
     }
 
     public function handleGlobalVarsSaving(GlobalVariablesSaving $event)
@@ -96,9 +97,9 @@ class TrackAssetReferences extends Subscriber
 
     protected function addReferences($item)
     {
-        AssetScanner::item($item)
+        DB::transaction(fn () => AssetScanner::item($item)
             ->checkOriginal()
-            ->addReferences();
+            ->addReferences());
     }
 
     protected function removeReferences($item)
