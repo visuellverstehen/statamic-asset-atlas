@@ -2,6 +2,7 @@
 
 namespace VV\AssetAtlas\Subscribers;
 
+use Illuminate\Support\Facades\DB;
 use Statamic\Events\EntryDeleted;
 use Statamic\Events\EntrySaved;
 use Statamic\Events\GlobalVariablesDeleted;
@@ -12,7 +13,6 @@ use Statamic\Events\TermDeleted;
 use Statamic\Events\TermSaved;
 use Statamic\Events\UserDeleted;
 use Statamic\Events\UserSaved;
-use Illuminate\Support\Facades\DB;
 use Statamic\Facades\Blink;
 use Statamic\Facades\GlobalVariables;
 use VV\AssetAtlas\AssetScanner;
