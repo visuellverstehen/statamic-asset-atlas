@@ -17,12 +17,12 @@ use Statamic\Facades\Blink;
 use Statamic\Facades\GlobalVariables;
 use Throwable;
 use VV\AssetAtlas\AssetScanner;
-use VV\AssetAtlas\Concerns\GetsItemData;
+use VV\AssetAtlas\Concerns\GetsItemMetaData;
 use VV\AssetAtlas\Exceptions\AssetAtlasTransactionException;
 
 class TrackAssetReferences extends Subscriber
 {
-    use GetsItemData;
+    use GetsItemMetaData;
 
     protected $listeners = [
         EntryDeleted::class => 'handleEntryDeleted',

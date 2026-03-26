@@ -7,7 +7,7 @@ use Statamic\Contracts\Entries\Entry;
 use Statamic\Contracts\Globals\Variables;
 use Statamic\Contracts\Taxonomies\Term;
 
-trait GetsItemData
+trait GetsItemMetaData
 {
     public function getItemType($item): ?string
     {
