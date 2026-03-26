@@ -18,7 +18,7 @@ use Statamic\Facades\GlobalVariables;
 use Throwable;
 use VV\AssetAtlas\AssetScanner;
 use VV\AssetAtlas\Concerns\GetsItemType;
-use VV\AssetAtlas\Events\AssetAtlasTransactionFailed;
+use VV\AssetAtlas\Exceptions\AssetAtlasTransactionFailed;
 
 class TrackAssetReferences extends Subscriber
 {
@@ -112,14 +112,12 @@ class TrackAssetReferences extends Subscriber
         try {
             DB::transaction($callback);
         } catch (Throwable $e) {
-            event(new AssetAtlasTransactionFailed(
+            throw new AssetAtlasTransactionFailed(
                 itemId: $item->id(),
                 itemType: $this->getItemType($item),
                 itemContext: $this->getItemContext($item),
-                exception: $e,
-            ));
-
-            throw $e;
+                previous: $e,
+            );
         }
     }
 
