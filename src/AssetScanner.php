@@ -5,11 +5,11 @@ namespace VV\AssetAtlas;
 use Illuminate\Support\Arr;
 use Statamic\Data\DataReferenceUpdater;
 use Statamic\Facades\AssetContainer;
-use VV\AssetAtlas\Concerns\GetsItemType;
+use VV\AssetAtlas\Concerns\GetsItemData;
 
 class AssetScanner extends DataReferenceUpdater
 {
-    use GetsItemType;
+    use GetsItemData;
 
     protected $checkOriginal = false;
 
