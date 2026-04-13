@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,7 +14,7 @@
 |
 */
 
-pest()->extend(Tests\TestCase::class)
+pest()->extend(TestCase::class)
     ->in('Feature');
 
 /*
@@ -54,7 +57,7 @@ expect()->extend('toBeTrackedFor', function ($asset, $expectedCount = 1) {
     $entryId = $entry->id();
 
     // Check if a reference exists
-    $exists = \Illuminate\Support\Facades\DB::table('asset_atlas')
+    $exists = DB::table('asset_atlas')
         ->where('asset_path', $assetPath)
         ->where('asset_container', $assetContainer)
         ->where('item_id', $entryId)
@@ -65,7 +68,7 @@ expect()->extend('toBeTrackedFor', function ($asset, $expectedCount = 1) {
     );
 
     // Verify the expected count
-    $actualCount = \Illuminate\Support\Facades\DB::table('asset_atlas')
+    $actualCount = DB::table('asset_atlas')
         ->where('asset_path', $assetPath)
         ->where('item_id', $entryId)
         ->count();

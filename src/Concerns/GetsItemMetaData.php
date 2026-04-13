@@ -7,7 +7,7 @@ use Statamic\Contracts\Entries\Entry;
 use Statamic\Contracts\Globals\Variables;
 use Statamic\Contracts\Taxonomies\Term;
 
-trait GetsItemType
+trait GetsItemMetaData
 {
     public function getItemType($item): ?string
     {
@@ -19,5 +19,15 @@ trait GetsItemType
         }
 
         return null;
+    }
+
+    public function getItemContext($item): ?string
+    {
+        return match (true) {
+            $item instanceof Entry => $item->collectionHandle(),
+            $item instanceof Term => $item->taxonomyHandle(),
+            $item instanceof Variables => $item->handle(),
+            default => null,
+        };
     }
 }

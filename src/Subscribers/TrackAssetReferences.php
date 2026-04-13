@@ -2,6 +2,7 @@
 
 namespace VV\AssetAtlas\Subscribers;
 
+use Illuminate\Support\Facades\DB;
 use Statamic\Events\EntryDeleted;
 use Statamic\Events\EntrySaved;
 use Statamic\Events\GlobalVariablesDeleted;
@@ -14,10 +15,15 @@ use Statamic\Events\UserDeleted;
 use Statamic\Events\UserSaved;
 use Statamic\Facades\Blink;
 use Statamic\Facades\GlobalVariables;
+use Throwable;
 use VV\AssetAtlas\AssetScanner;
+use VV\AssetAtlas\Concerns\GetsItemMetaData;
+use VV\AssetAtlas\Exceptions\AssetAtlasTransactionException;
 
 class TrackAssetReferences extends Subscriber
 {
+    use GetsItemMetaData;
+
     protected $listeners = [
         EntryDeleted::class => 'handleEntryDeleted',
         EntrySaved::class => 'handleEntrySaved',
@@ -61,7 +67,7 @@ class TrackAssetReferences extends Subscriber
                 ->checkOriginal();
         }
 
-        $scanner->addReferences();
+        $this->transaction(fn () => $scanner->addReferences(), $event->variables);
     }
 
     public function handleGlobalVarsSaving(GlobalVariablesSaving $event)
@@ -96,9 +102,23 @@ class TrackAssetReferences extends Subscriber
 
     protected function addReferences($item)
     {
-        AssetScanner::item($item)
+        $this->transaction(fn () => AssetScanner::item($item)
             ->checkOriginal()
-            ->addReferences();
+            ->addReferences(), $item);
+    }
+
+    protected function transaction(callable $callback, $item): void
+    {
+        try {
+            DB::transaction($callback);
+        } catch (Throwable $e) {
+            throw new AssetAtlasTransactionException(
+                itemId: $item->id(),
+                itemType: $this->getItemType($item),
+                itemContext: $this->getItemContext($item),
+                previous: $e,
+            );
+        }
     }
 
     protected function removeReferences($item)
