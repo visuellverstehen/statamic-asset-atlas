@@ -60,6 +60,60 @@ trait CreatesTestEntries
     }
 
     /**
+     * Create an entry with asset data in a grid row
+     */
+    protected function createEntryWithGridAsset(string $fieldName, mixed $fieldData): Entry
+    {
+        $entry = EntryFacade::make()
+            ->collection('pages')
+            ->blueprint('page')
+            ->slug('test-page-grid-'.time())
+            ->data([
+                'title' => 'Test Page with Grid Asset',
+                'grid_field' => [
+                    [
+                        'id' => uniqid(),
+                        $fieldName => $fieldData,
+                    ],
+                ],
+            ]);
+
+        $entry->save();
+
+        return $entry;
+    }
+
+    /**
+     * Create an entry with asset data inside a bard set node
+     */
+    protected function createEntryWithBardSetAsset(string $fieldName, mixed $fieldData): Entry
+    {
+        $entry = EntryFacade::make()
+            ->collection('pages')
+            ->blueprint('page')
+            ->slug('test-page-bard-set-'.time())
+            ->data([
+                'title' => 'Test Page with Bard Set Asset',
+                'bard_set_field' => [
+                    [
+                        'type' => 'set',
+                        'attrs' => [
+                            'id' => uniqid(),
+                            'values' => [
+                                'type' => 'media_set',
+                                $fieldName => $fieldData,
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $entry->save();
+
+        return $entry;
+    }
+
+    /**
      * Create a test asset with specified filename and container
      */
     protected function createAsset(string $filename = 'test-image.jpg', string $container = 'assets'): Asset

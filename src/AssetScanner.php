@@ -5,6 +5,7 @@ namespace VV\AssetAtlas;
 use Illuminate\Support\Arr;
 use Statamic\Data\DataReferenceUpdater;
 use Statamic\Facades\AssetContainer;
+use Statamic\Fields\Fields;
 use VV\AssetAtlas\Concerns\GetsItemMetaData;
 
 class AssetScanner extends DataReferenceUpdater
@@ -110,6 +111,49 @@ class AssetScanner extends DataReferenceUpdater
             ->scanBardFieldValues($fields, $dottedPrefix)
             ->scanMarkdownFieldValues($fields, $dottedPrefix)
             ->updateNestedFieldValues($fields, $dottedPrefix);
+    }
+
+    /*
+     * The nested-children traversal inherited from DataReferenceUpdater reads the
+     * set/row structure straight from the live item ($this->item->data()). The
+     * scanner instead has to honour $this->dataToScan, because when we re-scan the
+     * *original* data to prune stale references we pass that snapshot in as the
+     * source. Without these overrides the original pass would iterate the *current*
+     * set structure, never visit sets that were removed, and leave their asset
+     * references orphaned in the atlas. Each override mirrors its parent verbatim
+     * except for the data source.
+     */
+    protected function updateReplicatorChildren($field, $dottedKey)
+    {
+        collect(Arr::get($this->dataToScan, $dottedKey))->each(function ($set, $setKey) use ($dottedKey, $field) {
+            $setHandle = Arr::get($set, 'type');
+            $fields = Arr::get($field->fieldtype()->flattenedSetsConfig(), "{$setHandle}.fields");
+
+            if ($setHandle && $fields) {
+                $this->recursivelyUpdateFields((new Fields($fields))->all(), "{$dottedKey}.{$setKey}.");
+            }
+        });
+    }
+
+    protected function updateGridChildren($field, $dottedKey)
+    {
+        collect(Arr::get($this->dataToScan, $dottedKey))->each(function ($set, $setKey) use ($dottedKey, $field) {
+            if ($fields = Arr::get($field->config(), 'fields')) {
+                $this->recursivelyUpdateFields((new Fields($fields))->all(), "{$dottedKey}.{$setKey}.");
+            }
+        });
+    }
+
+    protected function updateBardChildren($field, $dottedKey)
+    {
+        collect(Arr::get($this->dataToScan, $dottedKey))->each(function ($set, $setKey) use ($dottedKey, $field) {
+            $setHandle = Arr::get($set, 'attrs.values.type');
+            $fields = Arr::get($field->fieldtype()->flattenedSetsConfig(), "{$setHandle}.fields");
+
+            if ($setHandle && $fields) {
+                $this->recursivelyUpdateFields((new Fields($fields))->all(), "{$dottedKey}.{$setKey}.attrs.values.");
+            }
+        });
     }
 
     protected function getConfiguredAssetsFieldContainer($field)
