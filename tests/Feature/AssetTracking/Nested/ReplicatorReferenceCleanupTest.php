@@ -42,3 +42,46 @@ it('prunes a nested replicator asset reference that was removed from a set', fun
         "Stale reference left behind: '{$asset->path()}' is still tracked for entry '{$entry->id()}' after its replicator set was removed."
     );
 });
+
+/*
+ * Partial removal: only one of several replicator sets is deleted. The removed
+ * set's asset must be pruned while the surviving set's asset must stay tracked.
+ * Guards against over-pruning and against a broken nested traversal that would
+ * skip surviving sets.
+ */
+it('prunes only the removed replicator set and keeps the surviving set reference', function () {
+    $removedAsset = $this->createAsset('test-replicator-removed.jpg');
+    $keptAsset = $this->createAsset('test-replicator-kept.jpg');
+
+    $entry = $this->createEntryWithReplicatorSets([
+        ['assets_field' => [$removedAsset->path()]],
+        ['assets_field' => [$keptAsset->path()]],
+    ]);
+
+    expect($entry)
+        ->toBeTrackedFor($removedAsset)
+        ->toBeTrackedFor($keptAsset);
+
+    $originalData = $entry->data()->all();
+
+    // Drop the first set; keep the second set verbatim.
+    $sets = $entry->get('replicator_field');
+    array_shift($sets);
+    $entry->set('replicator_field', $sets);
+
+    AssetScanner::item($entry)
+        ->setOriginal($originalData)
+        ->checkOriginal()
+        ->addReferences();
+
+    expect($entry)->toBeTrackedFor($keptAsset);
+
+    $removedRemaining = DB::table('asset_atlas')
+        ->where('asset_path', $removedAsset->path())
+        ->where('item_id', $entry->id())
+        ->count();
+
+    expect($removedRemaining)->toBe(0,
+        "Stale reference left behind for removed set's asset '{$removedAsset->path()}'."
+    );
+});

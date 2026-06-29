@@ -114,6 +114,93 @@ trait CreatesTestEntries
     }
 
     /**
+     * Create an entry with asset data in multiple replicator sets.
+     * Each element of \$setsData becomes one replicator set of type `new_set`,
+     * keyed by an `id`, carrying the given field => data pairs.
+     *
+     * @param  array<int, array<string, mixed>>  $setsData
+     */
+    protected function createEntryWithReplicatorSets(array $setsData): Entry
+    {
+        $replicatorData = array_map(function (array $fieldData) {
+            return [
+                'id' => uniqid(),
+                'type' => 'new_set',
+                'enabled' => true,
+            ] + $fieldData;
+        }, $setsData);
+
+        $entry = EntryFacade::make()
+            ->collection('pages')
+            ->blueprint('page')
+            ->slug('test-page-replicator-multi-'.time().'-'.uniqid())
+            ->data([
+                'title' => 'Test Page with Multiple Replicator Sets',
+                'replicator_field' => $replicatorData,
+            ]);
+
+        $entry->save();
+
+        return $entry;
+    }
+
+    /**
+     * Create an entry with asset data in multiple grid rows.
+     *
+     * @param  array<int, array<string, mixed>>  $rowsData
+     */
+    protected function createEntryWithGridRows(array $rowsData): Entry
+    {
+        $gridData = array_map(function (array $fieldData) {
+            return ['id' => uniqid()] + $fieldData;
+        }, $rowsData);
+
+        $entry = EntryFacade::make()
+            ->collection('pages')
+            ->blueprint('page')
+            ->slug('test-page-grid-multi-'.time().'-'.uniqid())
+            ->data([
+                'title' => 'Test Page with Multiple Grid Rows',
+                'grid_field' => $gridData,
+            ]);
+
+        $entry->save();
+
+        return $entry;
+    }
+
+    /**
+     * Create an entry with asset data in multiple bard set nodes.
+     *
+     * @param  array<int, array<string, mixed>>  $nodesData
+     */
+    protected function createEntryWithBardSetNodes(array $nodesData): Entry
+    {
+        $bardData = array_map(function (array $fieldData) {
+            return [
+                'type' => 'set',
+                'attrs' => [
+                    'id' => uniqid(),
+                    'values' => ['type' => 'media_set'] + $fieldData,
+                ],
+            ];
+        }, $nodesData);
+
+        $entry = EntryFacade::make()
+            ->collection('pages')
+            ->blueprint('page')
+            ->slug('test-page-bard-set-multi-'.time().'-'.uniqid())
+            ->data([
+                'title' => 'Test Page with Multiple Bard Set Nodes',
+                'bard_set_field' => $bardData,
+            ]);
+
+        $entry->save();
+
+        return $entry;
+    }
+
+    /**
      * Create a test asset with specified filename and container
      */
     protected function createAsset(string $filename = 'test-image.jpg', string $container = 'assets'): Asset
