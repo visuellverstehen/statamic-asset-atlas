@@ -7,12 +7,16 @@ use VV\AssetAtlas\AssetScanner;
  * Regression test for stale references left inside replicator/grid/bard sets.
  *
  * When an item is saved, the scanner re-scans its *original* data and prunes
- * references that no longer exist in the current data. That pruning is exercised
- * directly here via setOriginal()/checkOriginal() - the same API the GlobalVars
- * subscriber uses - rather than through a real save. The testbench harness syncs
- * an entry's original state *before* EntrySaved fires (real Statamic syncs it
- * after), so an event-driven test cannot observe the original data the pruning
- * relies on.
+ * references that no longer exist in the current data. In real Statamic,
+ * Entry::save() dispatches EntrySaved *before* calling syncOriginal()
+ * (Entry.php:433 then :446), so during the save subscriber getOriginal()
+ * returns the previous save's snapshot - the pre-edit data the prune pass diffs
+ * against. That fallback is proven by DataSwapRegressionTest.
+ *
+ * Here we drive the prune pass directly via setOriginal()/checkOriginal() - the
+ * same API the GlobalVars subscriber uses - rather than through a second real
+ * save. This isolates the nested-prune logic from the two-save dance and the
+ * subscriber/transaction/Stache wiring, and lets us feed an exact snapshot.
  */
 it('prunes a nested replicator asset reference that was removed from a set', function () {
     $asset = $this->createAsset('test-replicator-cleanup.jpg');
