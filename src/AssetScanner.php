@@ -92,7 +92,24 @@ class AssetScanner extends DataReferenceUpdater
     {
         $this->atlasItems = collect([]);
         $this->dataToScan = $source ?? $this->item->data()->all();
-        $this->recursivelyUpdateFields($this->getTopLevelFields());
+
+        // The nested-children traversal inherited from DataReferenceUpdater reads
+        // the set/row structure straight from $this->item->data(), not from the
+        // snapshot in $this->dataToScan. So that the inherited replicator/grid/
+        // bard/group traversals visit the same sets the leaf scanners do - in
+        // particular the *original* data when pruning stale references - align the
+        // item's data with the snapshot for the duration of the scan, then restore.
+        // data() is a pure property setter (ContainsData) and the scan path never
+        // saves the item, so this swap has no persistence side effects.
+        $previousData = $this->item->data()->all();
+
+        $this->item->data($this->dataToScan);
+
+        try {
+            $this->recursivelyUpdateFields($this->getTopLevelFields());
+        } finally {
+            $this->item->data($previousData);
+        }
     }
 
     protected function push(string $container, string $path)

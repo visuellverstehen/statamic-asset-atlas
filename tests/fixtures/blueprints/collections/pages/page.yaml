@@ -52,6 +52,37 @@ tabs:
               display: 'Link Field'
               container: assets
           -
+            handle: grid_field
+            field:
+              type: grid
+              display: 'Grid Field'
+              fields:
+                -
+                  handle: assets_field
+                  field:
+                    container: assets
+                    type: assets
+                    display: 'Assets Field'
+          -
+            handle: bard_set_field
+            field:
+              type: bard
+              display: 'Bard Field with Sets'
+              remove_empty_nodes: false
+              sets:
+                set_group:
+                  display: 'Set Group'
+                  sets:
+                    media_set:
+                      display: 'Media Set'
+                      fields:
+                        -
+                          handle: assets_field
+                          field:
+                            container: assets
+                            type: assets
+                            display: 'Assets Field'
+          -
             handle: replicator_field
             field:
               type: replicator

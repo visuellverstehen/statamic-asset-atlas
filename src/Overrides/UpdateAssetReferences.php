@@ -1,6 +1,6 @@
 <?php
 
-namespace VV\AssetAtlas\Subscribers;
+namespace VV\AssetAtlas\Overrides;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
@@ -9,6 +9,7 @@ use Statamic\Events\AssetReplaced;
 use Statamic\Events\AssetSaved;
 use Statamic\Listeners\UpdateAssetReferences as BaseListener;
 use VV\AssetAtlas\AssetAtlas;
+use VV\AssetAtlas\Subscribers\TrackAssetReferences;
 
 class UpdateAssetReferences extends BaseListener
 {

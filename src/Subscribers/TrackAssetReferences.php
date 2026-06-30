@@ -74,10 +74,13 @@ class TrackAssetReferences extends Subscriber
     {
         $id = $event->variables->id();
 
-        Blink::put(
-            'assetatlas-globalvar-'.$id,
-            GlobalVariables::find($id)->data()->all()
-        );
+        // No persisted version yet (e.g. a brand-new global set) means there is
+        // no original data to diff against, so there is nothing to stash.
+        if (! $existing = GlobalVariables::find($id)) {
+            return;
+        }
+
+        Blink::put('assetatlas-globalvar-'.$id, $existing->data()->all());
     }
 
     public function handleTermDeleted(TermDeleted $event)

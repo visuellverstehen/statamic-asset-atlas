@@ -5,12 +5,14 @@ namespace Tests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Statamic\Testing\AddonTestCase;
 use Tests\Concerns\CreatesTestEntries;
+use Tests\Concerns\CreatesTestItems;
 use Tests\Concerns\UsesTestFixtures;
 use VV\AssetAtlas\ServiceProvider;
 
 abstract class TestCase extends AddonTestCase
 {
     use CreatesTestEntries;
+    use CreatesTestItems;
     use RefreshDatabase;
     use UsesTestFixtures;
 
