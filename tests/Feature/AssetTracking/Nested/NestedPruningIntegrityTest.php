@@ -4,16 +4,14 @@ use Illuminate\Support\Facades\DB;
 use VV\AssetAtlas\AssetScanner;
 
 /*
- * Regression guards for the data-swap implementation of nested reference
- * pruning. The scanner aligns $this->item->data() with the snapshot being
- * scanned so the inherited DataReferenceUpdater traversal visits the right
- * sets, then restores the item's data in a finally block. These tests lock in
- * the two invariants that make that safe:
+ * Integrity guards for nested reference pruning. The scanner reads set/row
+ * structure from its own $dataToScan snapshot (via the *Children overrides)
+ * rather than mutating the live item, so these tests lock in two invariants:
  *
- *   1. The item's data is byte-for-byte restored after a scan - for both the
- *      current-data pass and the original-data prune pass. A missing restore
- *      (or a future Statamic change that mutates the item mid-traversal) would
- *      leak the scanned snapshot onto the live item and is caught here.
+ *   1. The item's data is byte-for-byte unchanged after a scan - for both the
+ *      current-data pass and the original-data prune pass. The scanner must
+ *      never write back to the item it scans (see ScannerDoesNotMutateItemTest
+ *      for the contract-level guard); a regression here would mean it did.
  *
  *   2. The production entry path - which relies on $item->getOriginal() rather
  *      than an explicitly setOriginal() snapshot - actually prunes a removed

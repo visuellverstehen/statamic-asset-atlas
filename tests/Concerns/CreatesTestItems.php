@@ -11,8 +11,8 @@ use Statamic\Facades\Term;
 /**
  * Builds a saved item of each tracked type (entry, term, global) carrying an
  * asset in a top-level `assets_field`, so a single Pest dataset can exercise
- * every branch of the TrackAssetReferences subscriber and the scanner's
- * data-swap across all item types — not just entries.
+ * every branch of the TrackAssetReferences subscriber and the scanner
+ * across all item types — not just entries.
  */
 trait CreatesTestItems
 {
