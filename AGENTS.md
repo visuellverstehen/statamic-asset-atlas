@@ -1,0 +1,1 @@
+- `CHANGELOG.md` is auto-generated on release by `.github/workflows/update-changelog.yml`. Don't edit it by hand.

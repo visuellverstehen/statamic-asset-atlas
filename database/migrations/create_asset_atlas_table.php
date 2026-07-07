@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('item_type');
             $table->timestamps();
 
-            $table->index(['asset_path', 'asset_container']);
+            $table->unique(['asset_path', 'asset_container', 'item_id', 'item_type'], 'asset_atlas_unique_reference');
         });
     }
 
