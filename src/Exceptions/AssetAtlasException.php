@@ -1,6 +1,6 @@
 <?php
 
-namespace VV\AssetAtlas;
+namespace VV\AssetAtlas\Exceptions;
 
 use Exception;
 
