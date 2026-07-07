@@ -8,6 +8,7 @@ use Statamic\Facades\Entry;
 use Statamic\Facades\GlobalVariables;
 use Statamic\Facades\Term;
 use Statamic\Facades\User;
+use VV\AssetAtlas\Exceptions\AssetAtlasException;
 
 class Atlas
 {
