@@ -2,7 +2,6 @@
 
 namespace VV\AssetAtlas\Overrides;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use Statamic\Events\AssetDeleted;
 use Statamic\Events\AssetReplaced;
@@ -20,7 +19,7 @@ class UpdateAssetReferences extends BaseListener
      * Try to use AssetAtlas, if required data is available
      * or pass on to original function, fetching everything.
      *
-     * @return Collection|LazyCollection
+     * @return LazyCollection
      */
     public function getItemsContainingData()
     {
@@ -31,7 +30,18 @@ class UpdateAssetReferences extends BaseListener
 
         // Get all items using the atlas, based on the
         // OLD path, so *before* updating the atlas.
-        return AssetAtlas::findAll($this->asset->getOriginal('path'), $this->asset->container()?->handle());
+        return LazyCollection::make(function () {
+            yield from AssetAtlas::findAll($this->asset->getOriginal('path'), $this->asset->container()?->handle());
+            yield from $this->runHooks('additional') ?? [];
+        });
+    }
+
+    /**
+     * Hooks are registered on Statamic's listener class, not on this override.
+     */
+    protected function runHooks(string $name, $payload = null)
+    {
+        return (new BaseListener)->runHooks($name, $payload);
     }
 
     /**

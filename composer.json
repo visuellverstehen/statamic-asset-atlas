@@ -35,7 +35,7 @@
     },
     "require": {
         "php": "^8.3",
-        "statamic/cms": "^5.0",
+        "statamic/cms": "^5.71",
         "laravel/framework": "^11 || ^12"
     },
     "require-dev": {
@@ -48,6 +48,11 @@
         "allow-plugins": {
             "pixelfear/composer-dist-plugin": true,
             "pestphp/pest-plugin": true
+        },
+        "policy": {
+            "advisories": {
+                "ignore-id": ["PKSA-52qp-479k-9x2j"]
+            }
         }
     },
     "scripts": {
