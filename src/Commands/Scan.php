@@ -7,6 +7,7 @@ use Statamic\Console\RunsInPlease;
 use Statamic\Listeners\Concerns\GetsItemsContainingData;
 use VV\AssetAtlas\AssetReference;
 use VV\AssetAtlas\AssetScanner;
+use VV\AssetAtlas\WorkingCopies;
 
 class Scan extends Command
 {
@@ -46,6 +47,11 @@ class Scan extends Command
         $processedCount = 0;
         $items->each(function ($item) use (&$processedCount) {
             AssetScanner::item($item)->addReferences();
+
+            if ($workingCopy = WorkingCopies::of($item)) {
+                WorkingCopies::track($item, $workingCopy);
+            }
+
             $processedCount++;
         });
 

@@ -14,7 +14,7 @@ class Atlas
 {
     protected $lazyThreshold = 500;
 
-    protected $itemTypes = ['entry', 'term', 'global_var', 'user'];
+    protected $itemTypes = ['entry', 'working_copy', 'term', 'global_var', 'user'];
 
     public function find(string $assetPath, string $containerHandle, ?string $itemType = null): Collection|LazyCollection
     {
@@ -37,13 +37,15 @@ class Atlas
             ->find($assetPath, $containerHandle)
             ->map(function ($ref) {
                 return match ($ref->item_type) {
-                    'entry' => Entry::find($ref->item_id),
+                    // A working copy is updated together with its entry.
+                    'entry', 'working_copy' => Entry::find($ref->item_id),
                     'global_var' => GlobalVariables::find($ref->item_id),
                     'term' => Term::find($ref->item_id),
                     'user' => User::find($ref->item_id),
                 };
             })
-            ->filter();
+            ->filter()
+            ->unique(fn ($item) => get_class($item).':'.$item->id());
     }
 
     public function findEntries(string $assetPath, string $containerHandle): Collection|LazyCollection
@@ -78,12 +80,13 @@ class Atlas
             ->filter();
     }
 
-    public function remove(string $assetPath, string $containerHandle, string $itemId)
+    public function remove(string $assetPath, string $containerHandle, string $itemId, ?string $itemType = null)
     {
         AssetReference::query()
             ->where('asset_path', $assetPath)
             ->where('asset_container', $containerHandle)
             ->where('item_id', $itemId)
+            ->when($itemType, fn ($query) => $query->where('item_type', $itemType))
             ->delete();
     }
 
@@ -95,10 +98,11 @@ class Atlas
             ->delete();
     }
 
-    public function removeAllByItem(string $itemId): void
+    public function removeAllByItem(string $itemId, ?string $itemType = null): void
     {
         AssetReference::query()
             ->where('item_id', $itemId)
+            ->when($itemType, fn ($query) => $query->where('item_type', $itemType))
             ->delete();
     }
 

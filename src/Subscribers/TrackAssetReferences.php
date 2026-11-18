@@ -8,6 +8,8 @@ use Statamic\Events\EntrySaved;
 use Statamic\Events\GlobalVariablesDeleted;
 use Statamic\Events\GlobalVariablesSaved;
 use Statamic\Events\GlobalVariablesSaving;
+use Statamic\Events\RevisionDeleted;
+use Statamic\Events\RevisionSaved;
 use Statamic\Events\Subscriber;
 use Statamic\Events\TermDeleted;
 use Statamic\Events\TermSaved;
@@ -15,10 +17,12 @@ use Statamic\Events\UserDeleted;
 use Statamic\Events\UserSaved;
 use Statamic\Facades\Blink;
 use Statamic\Facades\GlobalVariables;
+use Statamic\Revisions\WorkingCopy;
 use Throwable;
 use VV\AssetAtlas\AssetScanner;
 use VV\AssetAtlas\Concerns\GetsItemMetaData;
 use VV\AssetAtlas\Exceptions\AssetAtlasTransactionException;
+use VV\AssetAtlas\WorkingCopies;
 
 class TrackAssetReferences extends Subscriber
 {
@@ -30,6 +34,8 @@ class TrackAssetReferences extends Subscriber
         GlobalVariablesDeleted::class => 'handleGlobalVarsDeleted',
         GlobalVariablesSaved::class => 'handleGlobalVarsSaved',
         GlobalVariablesSaving::class => 'handleGlobalVarsSaving',
+        RevisionDeleted::class => 'handleRevisionDeleted',
+        RevisionSaved::class => 'handleRevisionSaved',
         TermDeleted::class => 'handleTermDeleted',
         TermSaved::class => 'handleTermSaved',
         UserDeleted::class => 'handleUserDeleted',
@@ -39,6 +45,7 @@ class TrackAssetReferences extends Subscriber
     public function handleEntryDeleted(EntryDeleted $event)
     {
         $this->removeReferences($event->entry);
+        WorkingCopies::untrack($event->entry);
     }
 
     public function handleEntrySaved(EntrySaved $event)
@@ -81,6 +88,20 @@ class TrackAssetReferences extends Subscriber
         }
 
         Blink::put('assetatlas-globalvar-'.$id, $existing->data()->all());
+    }
+
+    public function handleRevisionSaved(RevisionSaved $event)
+    {
+        if ($event->revision instanceof WorkingCopy && ($entry = WorkingCopies::entry($event->revision))) {
+            WorkingCopies::track($entry, $event->revision);
+        }
+    }
+
+    public function handleRevisionDeleted(RevisionDeleted $event)
+    {
+        if ($event->revision instanceof WorkingCopy && ($entry = WorkingCopies::entry($event->revision))) {
+            WorkingCopies::untrack($entry);
+        }
     }
 
     public function handleTermDeleted(TermDeleted $event)
