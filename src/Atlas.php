@@ -136,7 +136,8 @@ class Atlas
         // One statement instead of paging: renamed rows would drop out of the next page.
         DB::transaction(function () use ($oldPath, $newPath, $container) {
             // An item can already reference the new path, e.g. after replacing an asset with one it also uses.
-            AssetReference::query()
+            // Selected first: MySQL rejects a DELETE whose subquery reads the same table (error 1093).
+            $duplicateIds = AssetReference::query()
                 ->where('asset_path', $oldPath)
                 ->where('asset_container', $container)
                 ->whereExists(fn ($query) => $query
@@ -145,7 +146,9 @@ class Atlas
                     ->where('existing.asset_container', $container)
                     ->whereColumn('existing.item_id', 'asset_atlas.item_id')
                     ->whereColumn('existing.item_type', 'asset_atlas.item_type'))
-                ->delete();
+                ->pluck('id');
+
+            $duplicateIds->chunk(1000)->each(fn ($ids) => AssetReference::whereKey($ids)->delete());
 
             AssetReference::query()
                 ->where('asset_path', $oldPath)
