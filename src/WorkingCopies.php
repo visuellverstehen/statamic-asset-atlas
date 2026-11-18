@@ -25,12 +25,8 @@ class WorkingCopies
 
     public static function entry(Revision $revision): ?EntryContract
     {
-        // Entry working copies use the key `collections/{collection}/{site}/{id}`.
-        $parts = explode('/', $revision->key(), 4);
-
-        return count($parts) === 4 && $parts[0] === 'collections'
-            ? Entry::find($parts[3])
-            : null;
+        // Entry revisions store the entry id in their attributes.
+        return ($id = $revision->attribute('id')) ? Entry::find($id) : null;
     }
 
     public static function track(EntryContract $entry, WorkingCopy $workingCopy): void
