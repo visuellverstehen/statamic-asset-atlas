@@ -3,6 +3,7 @@
 namespace VV\AssetAtlas;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\GlobalVariables;
@@ -14,7 +15,7 @@ class Atlas
 {
     protected $lazyThreshold = 500;
 
-    protected $itemTypes = ['entry', 'term', 'global_var', 'user'];
+    protected $itemTypes = ['entry', 'working_copy', 'term', 'global_var', 'user'];
 
     public function find(string $assetPath, string $containerHandle, ?string $itemType = null): Collection|LazyCollection
     {
@@ -37,13 +38,15 @@ class Atlas
             ->find($assetPath, $containerHandle)
             ->map(function ($ref) {
                 return match ($ref->item_type) {
-                    'entry' => Entry::find($ref->item_id),
+                    // A working copy is updated together with its entry.
+                    'entry', 'working_copy' => Entry::find($ref->item_id),
                     'global_var' => GlobalVariables::find($ref->item_id),
                     'term' => Term::find($ref->item_id),
                     'user' => User::find($ref->item_id),
                 };
             })
-            ->filter();
+            ->filter()
+            ->unique(fn ($item) => get_class($item).':'.$item->id());
     }
 
     public function findEntries(string $assetPath, string $containerHandle): Collection|LazyCollection
@@ -78,12 +81,13 @@ class Atlas
             ->filter();
     }
 
-    public function remove(string $assetPath, string $containerHandle, string $itemId)
+    public function remove(string $assetPath, string $containerHandle, string $itemId, ?string $itemType = null)
     {
         AssetReference::query()
             ->where('asset_path', $assetPath)
             ->where('asset_container', $containerHandle)
             ->where('item_id', $itemId)
+            ->when($itemType, fn ($query) => $query->where('item_type', $itemType))
             ->delete();
     }
 
@@ -95,10 +99,11 @@ class Atlas
             ->delete();
     }
 
-    public function removeAllByItem(string $itemId): void
+    public function removeAllByItem(string $itemId, ?string $itemType = null): void
     {
         AssetReference::query()
             ->where('item_id', $itemId)
+            ->when($itemType, fn ($query) => $query->where('item_type', $itemType))
             ->delete();
     }
 
@@ -128,11 +133,27 @@ class Atlas
             return;
         }
 
-        $refs = $this->find($oldPath, $container);
+        // One statement instead of paging: renamed rows would drop out of the next page.
+        DB::transaction(function () use ($oldPath, $newPath, $container) {
+            // An item can already reference the new path, e.g. after replacing an asset with one it also uses.
+            // Selected first: MySQL rejects a DELETE whose subquery reads the same table (error 1093).
+            $duplicateIds = AssetReference::query()
+                ->where('asset_path', $oldPath)
+                ->where('asset_container', $container)
+                ->whereExists(fn ($query) => $query
+                    ->from('asset_atlas as existing')
+                    ->where('existing.asset_path', $newPath)
+                    ->where('existing.asset_container', $container)
+                    ->whereColumn('existing.item_id', 'asset_atlas.item_id')
+                    ->whereColumn('existing.item_type', 'asset_atlas.item_type'))
+                ->pluck('id');
 
-        $refs->each(function ($ref) use ($newPath) {
-            $ref->asset_path = $newPath;
-            $ref->save();
+            $duplicateIds->chunk(1000)->each(fn ($ids) => AssetReference::whereKey($ids)->delete());
+
+            AssetReference::query()
+                ->where('asset_path', $oldPath)
+                ->where('asset_container', $container)
+                ->update(['asset_path' => $newPath]);
         });
     }
 }

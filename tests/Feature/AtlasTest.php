@@ -85,3 +85,27 @@ it('excludes references to non-existent items when checking for unspecified item
     $trackedItems = AssetAtlas::findAll($assetPath, $assetContainer);
     expect($trackedItems)->toBeEmpty();
 });
+
+it('moves references onto a path the item already references', function () {
+    AssetAtlas::store('old.jpg', 'assets', 'item', 'working_copy');
+    AssetAtlas::store('new.jpg', 'assets', 'item', 'working_copy');
+    AssetAtlas::store('old.jpg', 'assets', 'other', 'entry');
+
+    AssetAtlas::update('old.jpg', 'new.jpg', 'assets');
+
+    expect(DB::table('asset_atlas')->orderBy('item_id')->get(['asset_path', 'item_id'])->map(fn ($row) => (array) $row)->all())
+        ->toBe([
+            ['asset_path' => 'new.jpg', 'item_id' => 'item'],
+            ['asset_path' => 'new.jpg', 'item_id' => 'other'],
+        ]);
+});
+
+it('moves every reference of an asset used more than the lazy threshold', function () {
+    DB::table('asset_atlas')->insert(collect(range(1, 1001))->map(fn ($i) => [
+        'asset_path' => 'old.jpg', 'asset_container' => 'assets', 'item_id' => "item-$i", 'item_type' => 'entry',
+    ])->all());
+
+    AssetAtlas::update('old.jpg', 'new.jpg', 'assets');
+
+    expect(DB::table('asset_atlas')->where('asset_path', 'old.jpg')->count())->toBe(0);
+});

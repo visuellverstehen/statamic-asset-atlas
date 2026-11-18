@@ -38,6 +38,16 @@ php please asset-atlas:scan --reset
 php please asset-atlas:scan --reset --force
 ```
 
+## Working copies
+
+If a collection has revisions enabled, AssetAtlas also tracks the assets used in working copies, including assets that only the working copy uses. Moving, replacing or deleting an asset updates the working copy together with its entry. Run `php please asset-atlas:scan` once after updating, so existing working copies get indexed.
+
+Working copy references are stored with the item type `working_copy`. `AssetAtlas::find()` without an item type returns them too, so an entry can appear twice there. `findEntries()` ignores working copies.
+
+## Statamic versions
+
+AssetAtlas supports Statamic 5 only. Support for Statamic 6 is not planned.
+
 ## More about us
 
 At **visuellverstehen** we create innovative digital and design solutions with a special focus on the common good. With technical expertise, high creativity and strategic skills, we develop products with a personal character.
