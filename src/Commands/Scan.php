@@ -4,6 +4,7 @@ namespace VV\AssetAtlas\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
+use Statamic\Contracts\Entries\Entry;
 use Statamic\Listeners\Concerns\GetsItemsContainingData;
 use VV\AssetAtlas\AssetReference;
 use VV\AssetAtlas\AssetScanner;
@@ -50,6 +51,8 @@ class Scan extends Command
 
             if ($workingCopy = WorkingCopies::of($item)) {
                 WorkingCopies::track($item, $workingCopy);
+            } elseif ($item instanceof Entry) {
+                WorkingCopies::untrack($item);
             }
 
             $processedCount++;

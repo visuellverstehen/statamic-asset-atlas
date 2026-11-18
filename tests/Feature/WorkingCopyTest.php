@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\DB;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use VV\AssetAtlas\AssetScanner;
+use VV\AssetAtlas\Subscribers\TrackAssetReferences;
 
 beforeEach(function () {
     config([
@@ -73,4 +74,15 @@ it('indexes working copies when scanning', function () {
     $this->artisan('statamic:asset-atlas:scan')->assertSuccessful();
 
     expect(workingCopyRows($entry))->toBe(['draft.jpg']);
+});
+
+it('removes references of working copies that no longer exist when scanning', function () {
+    $asset = $this->createAsset('draft.jpg');
+    $entry = $this->createEntryWithTopLevelAsset('assets_field', []);
+    saveWorkingCopy($entry, ['assets_field' => [$asset->path()]]);
+    TrackAssetReferences::withoutListeners(fn () => Entry::find($entry->id())->deleteWorkingCopy());
+
+    $this->artisan('statamic:asset-atlas:scan')->assertSuccessful();
+
+    expect(workingCopyRows($entry))->toBe([]);
 });
