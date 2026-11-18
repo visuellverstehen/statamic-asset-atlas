@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\DB;
 use Statamic\Facades\Collection;
 use Statamic\Facades\Entry;
 use VV\AssetAtlas\AssetScanner;
+use VV\AssetAtlas\Exceptions\AssetAtlasTransactionException;
 use VV\AssetAtlas\Subscribers\TrackAssetReferences;
 
 beforeEach(function () {
@@ -85,4 +86,12 @@ it('removes references of working copies that no longer exist when scanning', fu
     $this->artisan('statamic:asset-atlas:scan')->assertSuccessful();
 
     expect(workingCopyRows($entry))->toBe([]);
+});
+
+it('wraps working copy tracking failures with the entry context', function () {
+    $entry = $this->createEntryWithTopLevelAsset('assets_field', []);
+
+    DB::shouldReceive('transaction')->once()->andThrow(new RuntimeException('DB says no'));
+
+    expect(fn () => saveWorkingCopy($entry, []))->toThrow(AssetAtlasTransactionException::class);
 });

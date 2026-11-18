@@ -93,14 +93,14 @@ class TrackAssetReferences extends Subscriber
     public function handleRevisionSaved(RevisionSaved $event)
     {
         if ($event->revision instanceof WorkingCopy && ($entry = WorkingCopies::entry($event->revision))) {
-            WorkingCopies::track($entry, $event->revision);
+            $this->transaction(fn () => WorkingCopies::track($entry, $event->revision), $entry);
         }
     }
 
     public function handleRevisionDeleted(RevisionDeleted $event)
     {
         if ($event->revision instanceof WorkingCopy && ($entry = WorkingCopies::entry($event->revision))) {
-            WorkingCopies::untrack($entry);
+            $this->transaction(fn () => WorkingCopies::untrack($entry), $entry);
         }
     }
 
