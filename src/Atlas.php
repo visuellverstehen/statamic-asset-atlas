@@ -3,6 +3,7 @@
 namespace VV\AssetAtlas;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 use Statamic\Facades\Entry;
 use Statamic\Facades\GlobalVariables;
@@ -132,11 +133,24 @@ class Atlas
             return;
         }
 
-        $refs = $this->find($oldPath, $container);
+        // One statement instead of paging: renamed rows would drop out of the next page.
+        DB::transaction(function () use ($oldPath, $newPath, $container) {
+            // An item can already reference the new path, e.g. after replacing an asset with one it also uses.
+            AssetReference::query()
+                ->where('asset_path', $oldPath)
+                ->where('asset_container', $container)
+                ->whereExists(fn ($query) => $query
+                    ->from('asset_atlas as existing')
+                    ->where('existing.asset_path', $newPath)
+                    ->where('existing.asset_container', $container)
+                    ->whereColumn('existing.item_id', 'asset_atlas.item_id')
+                    ->whereColumn('existing.item_type', 'asset_atlas.item_type'))
+                ->delete();
 
-        $refs->each(function ($ref) use ($newPath) {
-            $ref->asset_path = $newPath;
-            $ref->save();
+            AssetReference::query()
+                ->where('asset_path', $oldPath)
+                ->where('asset_container', $container)
+                ->update(['asset_path' => $newPath]);
         });
     }
 }
