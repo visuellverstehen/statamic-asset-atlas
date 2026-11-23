@@ -153,8 +153,22 @@ it('skips deleting working copy references when scanning entries without tracked
 
 it('wraps working copy tracking failures with the entry context', function () {
     $entry = $this->createEntryWithTopLevelAsset('assets_field', []);
+    $db = DB::getFacadeRoot();
 
     DB::shouldReceive('transaction')->once()->andThrow(new RuntimeException('DB says no'));
 
-    expect(fn () => saveWorkingCopy($entry, []))->toThrow(AssetAtlasTransactionException::class);
+    try {
+        saveWorkingCopy($entry, []);
+    } catch (AssetAtlasTransactionException $e) {
+        expect($e->itemId)->toBe($entry->id())
+            ->and($e->itemType)->toBe('entry')
+            ->and($e->itemContext)->toBe('pages')
+            ->and($e->getPrevious()?->getMessage())->toBe('DB says no');
+
+        return;
+    } finally {
+        DB::swap($db);
+    }
+
+    $this->fail('Expected AssetAtlasTransactionException was not thrown.');
 });
