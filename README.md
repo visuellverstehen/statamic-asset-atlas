@@ -42,7 +42,7 @@ php please asset-atlas:scan --reset --force
 
 If a collection has revisions enabled, AssetAtlas also tracks the assets used in working copies, including assets that only the working copy uses. Moving, replacing or deleting an asset updates the working copy together with its entry. Run `php please asset-atlas:scan` once after updating, so existing working copies get indexed.
 
-Working copy references are stored with the item type `working_copy`. `AssetAtlas::find()` without an item type returns them too, so an entry can appear twice there. `findEntries()` ignores working copies.
+Working copy references are stored with the item type `working_copy`. `AssetAtlas::find()` without an item type returns them too, so an entry can appear twice there. `findAll()` deduplicates by item and includes entries referenced only by a working copy. `findEntries()` ignores working copies.
 
 ## Statamic versions
 
