@@ -109,3 +109,11 @@ it('moves every reference of an asset used more than the lazy threshold', functi
 
     expect(DB::table('asset_atlas')->where('asset_path', 'old.jpg')->count())->toBe(0);
 });
+
+it('keeps references on a case-only rename', function () {
+    AssetAtlas::store('Photo.jpg', 'assets', 'item', 'entry');
+
+    AssetAtlas::update('Photo.jpg', 'photo.jpg', 'assets');
+
+    expect(DB::table('asset_atlas')->pluck('asset_path')->all())->toBe(['photo.jpg']);
+});

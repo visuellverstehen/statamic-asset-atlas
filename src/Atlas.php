@@ -142,6 +142,7 @@ class Atlas
                 ->where('asset_container', $container)
                 ->whereExists(fn ($query) => $query
                     ->from('asset_atlas as existing')
+                    ->whereColumn('existing.id', '!=', 'asset_atlas.id')
                     ->where('existing.asset_path', $newPath)
                     ->where('existing.asset_container', $container)
                     ->whereColumn('existing.item_id', 'asset_atlas.item_id')
