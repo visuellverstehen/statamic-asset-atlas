@@ -135,6 +135,22 @@ it('removes references of working copies that no longer exist when scanning', fu
     expect(workingCopyRows($entry))->toBe([]);
 });
 
+it('skips deleting working copy references when scanning entries without tracked working copies', function () {
+    $this->createEntryWithTopLevelAsset('assets_field', []);
+    $this->createEntryWithTopLevelAsset('assets_field', []);
+
+    $deletes = 0;
+    DB::listen(function ($query) use (&$deletes) {
+        if (str_starts_with(strtolower(ltrim($query->sql)), 'delete')) {
+            $deletes++;
+        }
+    });
+
+    $this->artisan('statamic:asset-atlas:scan')->assertSuccessful();
+
+    expect($deletes)->toBe(0);
+});
+
 it('wraps working copy tracking failures with the entry context', function () {
     $entry = $this->createEntryWithTopLevelAsset('assets_field', []);
 
