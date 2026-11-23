@@ -22,7 +22,7 @@ class WorkingCopyItem
     public function data($data = null)
     {
         if (func_num_args() === 0) {
-            return collect($this->workingCopy->attribute('data') ?? []);
+            return collect($this->workingCopy->attribute('data'));
         }
 
         $this->workingCopy->attribute('data', $data);

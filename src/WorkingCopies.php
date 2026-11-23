@@ -26,7 +26,7 @@ class WorkingCopies
     public static function entry(Revision $revision): ?EntryContract
     {
         // Entry revisions store the entry id in their attributes.
-        return ($id = $revision->attribute('id')) ? Entry::find($id) : null;
+        return ($id = $revision->attributes()['id'] ?? null) ? Entry::find($id) : null;
     }
 
     public static function track(EntryContract $entry, WorkingCopy $workingCopy): void
