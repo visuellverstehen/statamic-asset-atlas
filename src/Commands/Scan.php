@@ -4,9 +4,11 @@ namespace VV\AssetAtlas\Commands;
 
 use Illuminate\Console\Command;
 use Statamic\Console\RunsInPlease;
+use Statamic\Contracts\Entries\Entry;
 use Statamic\Listeners\Concerns\GetsItemsContainingData;
 use VV\AssetAtlas\AssetReference;
 use VV\AssetAtlas\AssetScanner;
+use VV\AssetAtlas\WorkingCopies;
 
 class Scan extends Command
 {
@@ -43,9 +45,22 @@ class Scan extends Command
 
         $this->info('Processing...');
 
+        $trackedWorkingCopies = AssetReference::query()
+            ->where('item_type', 'working_copy')
+            ->distinct()
+            ->pluck('item_id')
+            ->flip();
+
         $processedCount = 0;
-        $items->each(function ($item) use (&$processedCount) {
+        $items->each(function ($item) use (&$processedCount, $trackedWorkingCopies) {
             AssetScanner::item($item)->addReferences();
+
+            if ($workingCopy = WorkingCopies::of($item)) {
+                WorkingCopies::track($item, $workingCopy);
+            } elseif ($item instanceof Entry && $trackedWorkingCopies->has($item->id())) {
+                WorkingCopies::untrack($item);
+            }
+
             $processedCount++;
         });
 

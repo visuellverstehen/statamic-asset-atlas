@@ -29,20 +29,29 @@ class AssetScanner extends DataReferenceUpdater
         return $this;
     }
 
+    public function forWorkingCopy(): self
+    {
+        $this->itemType = 'working_copy';
+
+        return $this;
+    }
+
     public function removeReferences(): void
     {
+        $itemType = $this->itemType ?? $this->getItemType($this->item);
+
         $this->findReferences();
 
-        $this->atlasItems->unique()->each(function ($item) {
+        $this->atlasItems->unique()->each(function ($item) use ($itemType) {
             [$container, $path] = explode('::', $item);
 
-            AssetAtlas::remove($path, $container, $this->item->id());
+            AssetAtlas::remove($path, $container, $this->item->id(), $itemType);
         });
     }
 
     public function addReferences(): void
     {
-        $itemType = $this->getItemType($this->item);
+        $itemType = $this->itemType ?? $this->getItemType($this->item);
         $itemId = $this->item->id();
 
         $this->findReferences();
@@ -63,10 +72,10 @@ class AssetScanner extends DataReferenceUpdater
             $this->atlasItems
                 ->unique()
                 ->diff($fromData)
-                ->each(function ($item) use ($itemId) {
+                ->each(function ($item) use ($itemId, $itemType) {
                     [$container, $path] = explode('::', $item);
 
-                    AssetAtlas::remove($path, $container, $itemId);
+                    AssetAtlas::remove($path, $container, $itemId, $itemType);
                 });
         }
     }

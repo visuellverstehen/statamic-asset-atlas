@@ -9,6 +9,8 @@ use Statamic\Events\AssetSaved;
 use Statamic\Listeners\UpdateAssetReferences as BaseListener;
 use VV\AssetAtlas\AssetAtlas;
 use VV\AssetAtlas\Subscribers\TrackAssetReferences;
+use VV\AssetAtlas\WorkingCopies;
+use VV\AssetAtlas\WorkingCopyItem;
 
 class UpdateAssetReferences extends BaseListener
 {
@@ -31,7 +33,15 @@ class UpdateAssetReferences extends BaseListener
         // Get all items using the atlas, based on the
         // OLD path, so *before* updating the atlas.
         return LazyCollection::make(function () {
-            yield from AssetAtlas::findAll($this->asset->getOriginal('path'), $this->asset->container()?->handle());
+            foreach (AssetAtlas::findAll($this->asset->getOriginal('path'), $this->asset->container()?->handle()) as $item) {
+                yield $item;
+
+                // TODO: remove when moving to Statamic 6, which updates working copies itself.
+                if ($workingCopy = WorkingCopies::of($item)) {
+                    yield new WorkingCopyItem($item, $workingCopy);
+                }
+            }
+
             yield from $this->runHooks('additional') ?? [];
         });
     }

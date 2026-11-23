@@ -26,6 +26,28 @@ abstract class TestCase extends AddonTestCase
         $this->loadFixtures();
     }
 
+    protected function getEnvironmentSetUp($app)
+    {
+        parent::getEnvironmentSetUp($app);
+
+        if (! $token = $_SERVER['TEST_TOKEN'] ?? null) {
+            return;
+        }
+
+        $fixtures = __DIR__."/__fixtures__/test_{$token}";
+
+        foreach ($app['config']->get('statamic.stache.stores', []) as $store => $config) {
+            if (isset($config['directory'])) {
+                $app['config']->set(
+                    "statamic.stache.stores.{$store}.directory",
+                    str_replace('/tests/__fixtures__/', "/tests/__fixtures__/test_{$token}/", $config['directory']),
+                );
+            }
+        }
+
+        $app['config']->set('statamic.system.blueprints_path', "{$fixtures}/blueprints");
+    }
+
     protected function resolveApplicationConfiguration($app)
     {
         parent::resolveApplicationConfiguration($app);
